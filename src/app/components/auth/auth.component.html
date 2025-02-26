@@ -16,25 +16,18 @@
         placeholder="Password"
         type="password"
       />
+      <div class="button-container">
+        <button class="button-confirm" type="submit">
+          {{ isRegistering ? "Sign Up" : "Login" }}
+        </button>
 
-      <button class="button-confirm">
-        {{ isRegistering ? "Sign up" : "Login" }}
-      </button>
-      <div *ngIf="!isRegistering">
-        <p>
-          <a (click)="toggleMode()">
-            {{
-              isRegistering
-                ? "Already have an account? Login"
-                : "No account? Sign up."
-            }}
-          </a>
-
-          <a (click)="resetPassword()">"Forgot password?"</a>
-
-        
-        </p>
+        <button class="button-confirm" (click)="toggleMode()" type="button">
+          Switch to {{ isRegistering ? "Login" : "Sign Up" }}
+        </button>
       </div>
+      <p>
+        <a (click)="resetPassword()">"Forgot password?"</a>
+      </p>
     </form>
   </div>
 </div>
