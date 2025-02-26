@@ -44,7 +44,7 @@ export class AuthComponent {
         next: (response => {
           console.log('User logged in!', response);
           this.authService.user.next(response);
-          this.router.navigate(['/home']);
+          this.router.navigate(['/track']);
         })
       })
     }
