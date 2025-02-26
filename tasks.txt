@@ -13,11 +13,9 @@ UI/UX >>>
 * error + notification handling 
 
 Tracker >>>
-* bug select category se poate introduce (set disabled)
+* la update -> back -> add expense raman agatate datele precedente
 * la add cheltuieli in trecut, no force refresh la current day
 * confirm la delete
-* mutat buton save
-* validare la incarcare cheltuiala sa nu fie goale cimpurile
 * future days disabled in loc de buton + notification
 * bug add expense button pe day changed
 * add userId pe cheltuieli
