@@ -17,7 +17,12 @@ export class TrackerComponent implements OnInit {
   @ViewChild('expAmount') expAmountInput!: ElementRef;
   @ViewChild('expCategory') expCategorySelect!: ElementRef;
   @ViewChild('expAmount') expAmount!: ElementRef;
+
   errorMessage: string = '';
+  selectedCategory: string = '';
+  isSaveDisabled: boolean = true;
+  expenseName: string = '';
+  expenseAmount: number | null = null;
 
   dailyTotals: { [key in DayOfWeek]: number } = {
     Monday: 0,
@@ -81,6 +86,9 @@ export class TrackerComponent implements OnInit {
     this.expNameInput.nativeElement.value = '';
     this.expCategorySelect.nativeElement.value = '';
     this.expAmountInput.nativeElement.value = '';
+    console.log(this.expNameInput.nativeElement.value);
+    console.log(this.expCategorySelect.nativeElement.value);
+    console.log(this.expAmountInput.nativeElement.value);
   }
 
   toggleWeeklyOverview() {
@@ -115,36 +123,38 @@ export class TrackerComponent implements OnInit {
     this.dailyExpenses = await this.crudService.getByDay(day);
   }
 
-  selectedCategory: string = '';
-  isSaveDisabled: boolean = true;
-  expenseName: string = '';
-  expenseAmount: number | null = null;
-
-  validateForm() {
+  validateFormAtSave() {
     this.isSaveDisabled = !this.selectedCategory ||
                           !this.expenseName ||
                           !this.expenseAmount ||
                           this.expenseAmount <= 0;
   }
+  validateFormAtUpdate() {
+    this.isSaveDisabled = false;
+  }
 
   async saveExpense(day: DayOfWeek) {
-    this._newExpense.name = this.expNameInput.nativeElement.value;
-    this._newExpense.category = this.expCategorySelect.nativeElement.value;
-    this._newExpense.amount = parseFloat(this.expAmountInput.nativeElement.value);
+    this._newExpense.name = this.expenseName;
+    console.log(this.expenseName);
+    this._newExpense.category = this.selectedCategory as Category;
+    this._newExpense.amount = this.expenseAmount!;
     this.showExpenseForm = false;
+    this.resetForm();
     await this.crudService.addItem(day, this._newExpense);
-    this.ngOnInit();
+    // this.ngOnInit();
+    this.getExpensesByDay(this.selectedDay);
+    // this.resetForm();
   }
 
   async deleteExpense(id: string) {
     await this.crudService.deleteItem(this.selectedDay, id);
-    this.ngOnInit();
+    this.getExpensesByDay(this.selectedDay);
   }
 
   resetForm() {
-    this.expNameInput.nativeElement.value = "";
-    this.expCategorySelect.nativeElement.value = "";
-    this.expAmountInput.nativeElement.value = "";
+    this.expenseName = "";
+    this.selectedCategory = "";
+    this.expenseAmount = null;
     this.isEditing = false;
     this.editingExpenseId = null;
   }
@@ -158,20 +168,22 @@ export class TrackerComponent implements OnInit {
     this.showExpenseForm = true;
 
     setTimeout(() => {
-      this.expNameInput.nativeElement.value = expense.name;
-      this.expCategorySelect.nativeElement.value = expense.category;
-      this.expAmountInput.nativeElement.value = expense.amount;
+      this.expenseName = expense.name;
+      this.selectedCategory = expense.category;
+      this.expenseAmount = expense.amount;
     }, 0);
+    this.isSaveDisabled = true;
   }
 
   async updateExpense() {
+
     if (!this.isEditing || !this.editingExpenseId)
       return;
 
     const updatedExpense: UpdateExpenseDTO = {
-      name: this.expNameInput.nativeElement.value,
-      category: this.expCategorySelect.nativeElement.value,
-      amount: parseFloat(this.expAmountInput.nativeElement.value)
+      name: this.expenseName,
+      category: this.selectedCategory as Category,
+      amount: this.expenseAmount!
     };
 
     // console.log("Updated values are: Name: ", updatedExpense.name, " Amount: ", updatedExpense.amount, " Category: ", updatedExpense.category)

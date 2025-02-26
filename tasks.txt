@@ -13,19 +13,17 @@ UI/UX >>>
 * error + notification handling 
 
 Tracker >>>
-* la add cheltuieli in trecut, no force refresh la current day
 * confirm la delete
 * future days disabled in loc de buton + notification
-* bug add expense button pe day changed
 * add userId pe cheltuieli
 * timestamp + afisare in ordine 
 * add/update/delete pe categories
 * add view cu cheltuieli pe weekly overview
 
-(V2) -> * pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
-(V2) -> * Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;
-(V2) -> * Weekly budget: The starting page of the app should prompt the user to enter their weekly budget. The “Summary” tab should display the user’s weekly savings;
-(V2) -> * Export expenses: The user should be able to export their weekly expenses in Excel format;
-(V2) -> * Expense history: The user should be able to access a detailed history of their expenses from previous weeks.
+(V2) -> pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
+(V2) -> Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;
+(V2) -> Weekly budget: The starting page of the app should prompt the user to enter their weekly budget. The “Summary” tab should display the user’s weekly savings;
+(V2) -> Export expenses: The user should be able to export their weekly expenses in Excel format;
+(V2) -> Expense history: The user should be able to access a detailed history of their expenses from previous weeks.
 
-(V3) -> * AI pentru recunoastere automata cheltuieli din poze
+(V3) -> AI pentru recunoastere automata cheltuieli din poze

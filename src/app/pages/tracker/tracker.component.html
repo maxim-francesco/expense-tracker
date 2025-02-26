@@ -33,14 +33,14 @@
                           <h3>Expenses for {{ selectedDay }}</h3>
 
                           <label>Expense Name:</label>
-                          <input #expName [(ngModel)]="expenseName" (change)="validateForm()" type="text" placeholder="Enter expense name" />
+                          <input #expName [(ngModel)]="expenseName" (change)="isEditing ? validateFormAtUpdate() : validateFormAtSave()" type="text" placeholder="Enter expense name" />
 
                           <label>Add or select category
                               <!-- <button class="add-category-button"
                                   (click)="toggleCategoryPopup()">+</button> -->
                           </label>
                           <div class="category-container">
-                              <select #expCategory [(ngModel)]="selectedCategory" (change)="validateForm()" required>
+                              <select #expCategory [(ngModel)]="selectedCategory" (change)="isEditing ? validateFormAtUpdate() : validateFormAtSave()" required>
                                   <option value="" disabled selected>Select Category</option>
                                   <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
                               </select>
@@ -58,7 +58,7 @@
 
                           <label>Amount:</label>
                           <input #expAmount [(ngModel)]="expenseAmount"
-                                  type="number" (change)="validateForm()"
+                                  type="number" (change)="isEditing ? validateFormAtUpdate() : validateFormAtSave()"
                                   placeholder="Enter an amount"
                                   (input)="validateAmount($event)"
                                   (keypress)="onKeyPress($event)"
