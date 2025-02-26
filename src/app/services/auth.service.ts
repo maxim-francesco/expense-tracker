@@ -30,6 +30,7 @@ export class AuthService {
             returnSecureToken: true
         }).pipe(tap(response => {
             this.user.next(response);
+            this.sendVerificationEmail(response.idToken);
         }))
     }
 
@@ -57,6 +58,14 @@ export class AuthService {
         this.user.next(null);
         console.log("User logged out!")
         this.router.navigate(['/auth']);
+
+    }
+
+    sendVerificationEmail(idToken: string){
+        return this.http.post(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${this.apiKey}`, {
+            requestType: "VERIFY_EMAIL",
+            idToken
+          })
 
     }
 
