@@ -8,10 +8,6 @@ Autentificare >>>
 Routes >>>
 * redirect pe tracker la login
 
-Config >>>
-* dotenv vars
-* README
-
 UI/UX >>>
 * mobile friendly
 * error + notification handling 
