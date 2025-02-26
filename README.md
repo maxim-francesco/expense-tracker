@@ -1,6 +1,6 @@
 # ExpenseTracker
 
-Deployed at: https://expense-tracker-ntt.vercel.app
+Deployed at: [Vercel App](https://expense-tracker-ntt.vercel.app)
 
 ### Overview
 
