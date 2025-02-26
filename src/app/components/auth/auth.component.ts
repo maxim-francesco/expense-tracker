@@ -16,7 +16,7 @@ export class AuthComponent {
   password = '';
   isRegistering = false;
   confirmPassword = '';
-  isAuthenticated=false;
+  isAuthenticated = false;
 
 
   constructor(
@@ -24,8 +24,8 @@ export class AuthComponent {
     private authService: AuthService
   ) { }
 
-  ngOnInit(){
-    this.authService.user.subscribe(user =>{
+  ngOnInit() {
+    this.authService.user.subscribe(user => {
       this.isAuthenticated = !!user;
     })
   }
@@ -41,8 +41,9 @@ export class AuthComponent {
     }
 
     if (this.isRegistering) {
-      if(this.password !==this.confirmPassword){
+      if (this.password !== this.confirmPassword) {
         alert('Passwords do not match')//aici sa pui mesaj nu alerta
+        return;
       }
       //sign up user
       this.authService.signup(this.email, this.password).subscribe({
