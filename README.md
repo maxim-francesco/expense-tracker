@@ -33,19 +33,27 @@ git clone https://github.com/andricolae/expense-tracker.git
 
 Navigate to the project directory:
 
-bashCopycd expense-tracker
+```bash
+cd expense-tracker
+```
 
 Install dependencies:
 
-bashCopynpm install
+```bash
+npm install
+```
 
 Set up environment variables:
 
-bashCopycp .env.example .env
+```bash
+cp .env.example .env
+```
 Then edit the .env file with appropriate values for your environment.
 
 Start the development server:
 
-bashCopyng serve
+```bash
+ng serve
+```
 
 Open your browser and navigate to http://localhost:4200
