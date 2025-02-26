@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from '../../models/expense.model';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-tracker',
@@ -13,10 +14,6 @@ import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from
   styleUrls: ['./tracker.component.css']
 })
 export class TrackerComponent implements OnInit {
-  @ViewChild('expName') expNameInput!: ElementRef;
-  @ViewChild('expAmount') expAmountInput!: ElementRef;
-  @ViewChild('expCategory') expCategorySelect!: ElementRef;
-  @ViewChild('expAmount') expAmount!: ElementRef;
 
   errorMessage: string = '';
   selectedCategory: string = '';
@@ -62,7 +59,7 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService) { }
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private dialog: MatDialog) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -83,12 +80,6 @@ export class TrackerComponent implements OnInit {
     if (!this.showExpenseForm) {
       this.resetForm();
     }
-    this.expNameInput.nativeElement.value = '';
-    this.expCategorySelect.nativeElement.value = '';
-    this.expAmountInput.nativeElement.value = '';
-    console.log(this.expNameInput.nativeElement.value);
-    console.log(this.expCategorySelect.nativeElement.value);
-    console.log(this.expAmountInput.nativeElement.value);
   }
 
   toggleWeeklyOverview() {
@@ -147,8 +138,11 @@ export class TrackerComponent implements OnInit {
   }
 
   async deleteExpense(id: string) {
-    await this.crudService.deleteItem(this.selectedDay, id);
-    this.getExpensesByDay(this.selectedDay);
+    const confirmation = confirm(`Are you sure you want to delete?`);
+    if (confirmation) {
+      await this.crudService.deleteItem(this.selectedDay, id);
+      this.getExpensesByDay(this.selectedDay);
+    }
   }
 
   resetForm() {
@@ -217,6 +211,17 @@ export class TrackerComponent implements OnInit {
     const today = new Date();
     // return this.selectedDay > this.days[today.getDay() - 1];
     return this.days.indexOf(this.selectedDay) > this.days.indexOf(this.days[today.getDay() - 1]);
+  }
+
+  isFutureDay(day: DayOfWeek): boolean {
+    const today = new Date();
+    const dayIndex = this.days.indexOf(day);
+    const todayIndex = today.getDay() - 1; // getDay() returns 0 (Sunday) to 6 (Saturday), so adjust for array indexing
+    if (todayIndex < 0) {
+      // Adjust for when today is Sunday (index -1 in our array)
+      return dayIndex !== 0;
+    }
+    return dayIndex > todayIndex;
   }
 
   loadCategories(): void { }

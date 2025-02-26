@@ -13,8 +13,7 @@ UI/UX >>>
 * error + notification handling 
 
 Tracker >>>
-* confirm la delete
-* future days disabled in loc de buton + notification
+* delete confirmation in dialog - not in alert
 * add userId pe cheltuieli
 * timestamp + afisare in ordine 
 * add/update/delete pe categories
