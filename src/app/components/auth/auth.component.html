@@ -1,6 +1,6 @@
 <div class="background-container">
   <div class="auth-container">
-    <form class="form" (ngSubmit)="onSubmit()">
+    <form #authForm="ngForm" class="form" (ngSubmit)="onSubmit(authForm)">
       <h2 id="heading">{{ isRegistering ? "Register" : "Login" }}</h2>
       <input
         class="input"

@@ -29,7 +29,6 @@ export class AuthService {
             password: password,
             returnSecureToken: true
         }).pipe(tap(response => {
-            this.user.next(response);
             this.sendVerificationEmail(response.idToken).subscribe(()=>console.log("Verification mail sent!"));
         }))
     }
@@ -42,6 +41,7 @@ export class AuthService {
 
         }).pipe(tap(response => {
             this.user.next(response);
+            this.router.navigate(['track']);
         }))
 
     }

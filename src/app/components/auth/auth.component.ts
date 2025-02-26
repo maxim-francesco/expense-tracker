@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 
@@ -16,6 +16,7 @@ export class AuthComponent {
   password = '';
   isRegistering = false;
   confirmPassword = '';
+  isAuthenticated=false;
 
 
   constructor(
@@ -23,13 +24,22 @@ export class AuthComponent {
     private authService: AuthService
   ) { }
 
+  ngOnInit(){
+    this.authService.user.subscribe(user =>{
+      this.isAuthenticated = !!user;
+    })
+  }
 
   toggleMode() {
     this.isRegistering = !this.isRegistering;
     this.confirmPassword = '';
   }
 
-  onSubmit() {
+  onSubmit(form: NgForm) {
+    if (!form.valid) {
+      return;
+    }
+
     if (this.isRegistering) {
       if(this.password !==this.confirmPassword){
         alert('Passwords do not match')//aici sa pui mesaj nu alerta
@@ -38,7 +48,6 @@ export class AuthComponent {
       this.authService.signup(this.email, this.password).subscribe({
         next: (response => {
           console.log('User registered', response);
-          this.authService.user.next(response);
           this.isRegistering = false;
         })
       })
@@ -53,6 +62,8 @@ export class AuthComponent {
         })
       })
     }
+
+    form.reset();
 
   }
 
