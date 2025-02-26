@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { TrackerConfigService, TrackerConfig } from '../../services/tracker-config.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -57,7 +57,10 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService) { }
+  expendedDay: DayOfWeek | null = null;
+  expendedDayExpenses: Expense[] = [];
+
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -150,7 +153,7 @@ export class TrackerComponent implements OnInit {
   }
 
   async updateExpense() {
-    if (!this.isEditing || !this.editingExpenseId) 
+    if (!this.isEditing || !this.editingExpenseId)
       return;
 
     const updatedExpense: UpdateExpenseDTO = {
@@ -227,10 +230,10 @@ export class TrackerComponent implements OnInit {
     const inputValue = (event.target as HTMLInputElement).value;
 
     if ([46, 8, 9, 27, 13].indexOf(charCode) !== -1 ||
-        (charCode === 65 && event.ctrlKey === true) ||
-        (charCode === 67 && event.ctrlKey === true) ||
-        (charCode === 86 && event.ctrlKey === true) ||
-        (charCode === 88 && event.ctrlKey === true)) {
+      (charCode === 65 && event.ctrlKey === true) ||
+      (charCode === 67 && event.ctrlKey === true) ||
+      (charCode === 86 && event.ctrlKey === true) ||
+      (charCode === 88 && event.ctrlKey === true)) {
       return true;
     }
 
@@ -243,5 +246,17 @@ export class TrackerComponent implements OnInit {
     }
 
     return false;
+  }
+
+  toggleDayExpenses(day: DayOfWeek) {
+    if (this.expendedDay === day) {
+      this.expendedDay = null;
+      this.expendedDayExpenses = [];
+    } else {
+      this.expendedDay = day;
+      this.getExpensesByDay(day);
+      this.cdr.detectChanges();
+      this.expendedDayExpenses = [...this.dailyExpenses];
+    }
   }
 }

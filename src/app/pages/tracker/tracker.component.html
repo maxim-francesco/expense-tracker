@@ -58,11 +58,9 @@
                             </div>
 
                             <label>Amount:</label>
-                            <input #expAmount type="number"
-                                    placeholder="Enter an amount"
-                                    (input)="validateAmount($event)"
-                                    (keypress)="onKeyPress($event)"
-                                    step="0.01" min="0.01" />
+                            <input #expAmount type="number" placeholder="Enter an amount"
+                                (input)="validateAmount($event)" (keypress)="onKeyPress($event)" step="0.01"
+                                min="0.01" />
                         </div>
                     </ng-container>
 
@@ -91,12 +89,28 @@
                 <ng-container *ngIf="showWeeklyOverview">
                     <h2>Total Weekly Expenses: {{ getWeeklyTotal() }} </h2>
                     <ul class="week-summary">
-                        <li *ngFor="let day of days">
-                            {{ day }}: {{ dailyTotals[day] }}
+                        <li *ngFor="let day of days" (click)="toggleDayExpenses(day)" class="clickable-day">
+                            {{ day }}: {{ dailyTotals[day] }} €
+                            <div *ngIf="expendedDay === day" class="expense-list">
+                                <h4>Expenses for {{ day }}</h4>
+                                <div *ngIf="expendedDayExpenses.length > 0">
+                                    <div class="expense-item" *ngFor="let _expense of expendedDayExpenses">
+                                        <div class="expense-info">
+                                            <span class="expense-name">{{ _expense.name }}</span>
+                                            <span class="expense-category">{{ _expense.category }}</span>
+                                        </div>
+                                        <div class="expense-amount">
+                                            {{ _expense.amount }} €
+                                        </div>
+                                    </div>
+                                </div>
+                                <p *ngIf="expendedDayExpenses.length === 0">No expenses recorded for {{ day }}</p>
+                            </div>
                         </li>
                     </ul>
                     <button class="button" (click)="toggleWeeklyOverview()">Back to Tracker</button>
                 </ng-container>
+                
             </div>
         </div>
     </div>
