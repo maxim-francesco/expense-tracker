@@ -78,6 +78,9 @@ export class TrackerComponent implements OnInit {
     if (!this.showExpenseForm) {
       this.resetForm();
     }
+    this.expNameInput.nativeElement.value = '';
+    this.expCategorySelect.nativeElement.value = '';
+    this.expAmountInput.nativeElement.value = '';
   }
 
   toggleWeeklyOverview() {

@@ -13,7 +13,6 @@ UI/UX >>>
 * error + notification handling 
 
 Tracker >>>
-* la update -> back -> add expense raman agatate datele precedente
 * la add cheltuieli in trecut, no force refresh la current day
 * confirm la delete
 * future days disabled in loc de buton + notification
