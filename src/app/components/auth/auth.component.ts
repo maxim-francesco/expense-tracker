@@ -15,6 +15,7 @@ export class AuthComponent {
   email = '';
   password = '';
   isRegistering = false;
+  confirmPassword = '';
 
 
   constructor(
@@ -25,10 +26,14 @@ export class AuthComponent {
 
   toggleMode() {
     this.isRegistering = !this.isRegistering;
+    this.confirmPassword = '';
   }
 
   onSubmit() {
     if (this.isRegistering) {
+      if(this.password !==this.confirmPassword){
+        alert('Passwords do not match')//aici sa pui mesaj nu alerta
+      }
       //sign up user
       this.authService.signup(this.email, this.password).subscribe({
         next: (response => {

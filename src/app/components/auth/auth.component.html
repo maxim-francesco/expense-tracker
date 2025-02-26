@@ -16,6 +16,14 @@
         placeholder="Password"
         type="password"
       />
+      <input
+        *ngIf="isRegistering"
+        class="input"
+        [(ngModel)]="confirmPassword"
+        name="confirmPassword"
+        placeholder="Confirm Password"
+        type="password"
+      />
       <div class="button-container">
         <button class="button-confirm" type="submit">
           {{ isRegistering ? "Sign Up" : "Login" }}
