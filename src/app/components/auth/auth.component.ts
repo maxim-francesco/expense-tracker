@@ -57,7 +57,7 @@ export class AuthComponent {
       this.authService.login(this.email, this.password).subscribe({
         next: (response => {
           console.log('User logged in!', response);
-          this.authService.user.next(response);
+          //this.authService.user.next(response);
           this.router.navigate(['/track']);
         })
       })
