@@ -1,11 +1,33 @@
-* reset password in componenta auth, nu alerts. register & forgot password nu par link-uri/butoane -> Tudor
-* register cu confirmare pe email -> Tudor
-* keep the user logged in -> Tudor
-* redirect la login -> Robert
-* dotenv vars -> Andrei
-* add userid PE cheltuieli -> Andrei
-* mobile friendly -> Ana temporar
-* Summary unde sa vad toate cheltuielile din saptamana respectiva ?????
+Autentificare >>>
+* reset password in componenta auth, nu prin window alerts
+* register & forgot password nu par link-uri/butoane, trebuie modificat mouse indicator-ul
+* register cu confirmare pe email
+* cimp nou pentru confirm password la register
+* keep the user logged in at refresh
+
+Routes >>>
+* redirect pe tracker la login
+
+Config >>>
+* dotenv vars
+* README
+
+UI/UX >>>
+* mobile friendly
+* error + notification handling 
+
+Tracker >>>
+* bug select category se poate introduce (set disabled)
+* la add cheltuieli in trecut, no force refresh la current day
+* confirm la delete
+* mutat buton save
+* validare la incarcare cheltuiala sa nu fie goale cimpurile
+* future days disabled in loc de buton + notification
+* bug add expense button pe day changed
+* add userId pe cheltuieli
+* timestamp + afisare in ordine 
+* add/update/delete pe categories
+* add view cu cheltuieli pe weekly overview
 
 (V2) -> * pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
 (V2) -> * Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;

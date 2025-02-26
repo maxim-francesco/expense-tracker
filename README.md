@@ -1,59 +1,26 @@
 # ExpenseTracker
 
-Deployed at: https://expense-tracker-phi-olive.vercel.app
+Deployed at: https://expense-tracker-ntt.vercel.app
 
-## Development server
+### Overview
 
-To start a local development server, run:
+The Expense Tracker is an internal Angular application developed as part of the NTT DATA Tech Trek initiative. This tool streamlines the expense reporting process for NTT DATA employees, allowing for efficient submission, tracking, and management of business expenses.
 
-```bash
-ng serve
-```
+### Features
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+* **Quick Expense Entry** : Submit expenses on-the-go with an intuitive interface
+* **Receipt Management** : Upload, store, and organize digital receipts (coming in V3)
+* **Expense Categories** : Categorize expenses for better financial visibility
+* **Approval Workflow** : Streamlined approval process with notifications (coming in V3)
+* **Reporting** : Generate detailed expense reports across various time periods (coming in V2)
+* **Export Options** : Download reports in multiple formats (PDF, CSV, Excel) (coming in V2)
 
-## Code scaffolding
+## Getting Started
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Prerequisites
 
-```bash
-ng generate component component-name
-```
+* Node.js (v16.0 or higher)
+* Angular CLI (v14.0 or higher)
+* npm (v8.0 or higher)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Instalation
