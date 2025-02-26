@@ -25,32 +25,32 @@ The Expense Tracker is an internal Angular application developed as part of the 
 
 ### Instalation
 
-Clone the repository:
+#### Clone the repository:
 
 ```bash
 git clone https://github.com/andricolae/expense-tracker.git
 ```
 
-Navigate to the project directory:
+#### Navigate to the project directory:
 
 ```bash
 cd expense-tracker
 ```
 
-Install dependencies:
+#### Install dependencies:
 
 ```bash
 npm install
 ```
 
-Set up environment variables:
+#### Set up environment variables:
 
 ```bash
 cp .env.example .env
 ```
 Then edit the .env file with appropriate values for your environment.
 
-Start the development server:
+#### Start the development server:
 
 ```bash
 ng serve
