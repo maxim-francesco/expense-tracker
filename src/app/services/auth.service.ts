@@ -30,7 +30,7 @@ export class AuthService {
             returnSecureToken: true
         }).pipe(tap(response => {
             this.user.next(response);
-            this.sendVerificationEmail(response.idToken);
+            this.sendVerificationEmail(response.idToken).subscribe(()=>console.log("Verification mail sent!"));
         }))
     }
 
