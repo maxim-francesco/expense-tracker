@@ -20,7 +20,7 @@
                             {{ showExpenseForm ? 'Back' : 'Add Expense' }}
                         </button>
                         <!-- <button class="button save-button" *ngIf="showExpenseForm" (click)="saveExpense(selectedDay)">Save</button> -->
-                        <button class="button save-button" *ngIf="showExpenseForm"
+                        <button [disabled]="isSaveDisabled" class="button save-button" *ngIf="showExpenseForm"
                             (click)="isEditing ? updateExpense() : saveExpense(selectedDay)">
                             {{ isEditing ? 'Update' : 'Save' }}
                         </button>
@@ -34,16 +34,16 @@
                             <h3>Expenses for {{ selectedDay }}</h3>
 
                             <label>Expense Name:</label>
-                            <input #expName type="text" placeholder="Enter expense name" />
+                            <input #expName [(ngModel)]="expenseName" (change)="validateForm()" type="text" placeholder="Enter expense name" />
 
                             <label>Add or select category
                                 <!-- <button class="add-category-button"
                                     (click)="toggleCategoryPopup()">+</button> -->
                             </label>
                             <div class="category-container">
-                                <select #expCategory>
-                                    <option>Select Category</option>
-                                    <option *ngFor="let category of categories">{{ category }}</option>
+                                <select #expCategory [(ngModel)]="selectedCategory" (change)="validateForm()" required>
+                                    <option value="" disabled selected>Select Category</option>
+                                    <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
                                 </select>
 
                             </div>
@@ -58,7 +58,8 @@
                             </div>
 
                             <label>Amount:</label>
-                            <input #expAmount type="number"
+                            <input #expAmount [(ngModel)]="expenseAmount"
+                                    type="number" (change)="validateForm()"
                                     placeholder="Enter an amount"
                                     (input)="validateAmount($event)"
                                     (keypress)="onKeyPress($event)"

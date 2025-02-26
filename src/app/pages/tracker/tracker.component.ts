@@ -112,6 +112,18 @@ export class TrackerComponent implements OnInit {
     this.dailyExpenses = await this.crudService.getByDay(day);
   }
 
+  selectedCategory: string = '';
+  isSaveDisabled: boolean = true;
+  expenseName: string = '';
+  expenseAmount: number | null = null;
+
+  validateForm() {
+    this.isSaveDisabled = !this.selectedCategory ||
+                          !this.expenseName ||
+                          !this.expenseAmount ||
+                          this.expenseAmount <= 0;
+  }
+
   async saveExpense(day: DayOfWeek) {
     this._newExpense.name = this.expNameInput.nativeElement.value;
     this._newExpense.category = this.expCategorySelect.nativeElement.value;
@@ -150,7 +162,7 @@ export class TrackerComponent implements OnInit {
   }
 
   async updateExpense() {
-    if (!this.isEditing || !this.editingExpenseId) 
+    if (!this.isEditing || !this.editingExpenseId)
       return;
 
     const updatedExpense: UpdateExpenseDTO = {
@@ -227,10 +239,10 @@ export class TrackerComponent implements OnInit {
     const inputValue = (event.target as HTMLInputElement).value;
 
     if ([46, 8, 9, 27, 13].indexOf(charCode) !== -1 ||
-        (charCode === 65 && event.ctrlKey === true) ||
-        (charCode === 67 && event.ctrlKey === true) ||
-        (charCode === 86 && event.ctrlKey === true) ||
-        (charCode === 88 && event.ctrlKey === true)) {
+      (charCode === 65 && event.ctrlKey === true) ||
+      (charCode === 67 && event.ctrlKey === true) ||
+      (charCode === 86 && event.ctrlKey === true) ||
+      (charCode === 88 && event.ctrlKey === true)) {
       return true;
     }
 
