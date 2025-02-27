@@ -87,7 +87,7 @@
                 </ng-container>
 
                 <ng-container *ngIf="showWeeklyOverview">
-                    <h2>Total Weekly Expenses: {{ getWeeklyTotal() }} </h2>
+                    <h2>Total Weekly Expenses: {{ getWeeklyTotal() }} €</h2>
                     <ul class="week-summary">
                         <li *ngFor="let day of days" (click)="toggleDayExpenses(day)" class="clickable-day">
                             {{ day }}: {{ dailyTotals[day] }} €
