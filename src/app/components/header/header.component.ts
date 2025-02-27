@@ -1,9 +1,10 @@
-import { Component, OnInit , ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ConfigService, Config, MenuItem } from '../../services/config.service';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -17,26 +18,27 @@ export class HeaderComponent {
   menu: MenuItem[] = [];
   sticky = false;
   isAuthenticated = false;
+  private userSub!: Subscription;
 
   constructor(
     private configService: ConfigService,
     private router: Router,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-  
-      this.loadMenu();
 
-      this.authService.user.subscribe(user=>{
-        this.isAuthenticated = !!user;
-      });
-    }
+    this.loadMenu();
+
+    this.userSub = this.authService.user.subscribe(user => {
+      this.isAuthenticated = !!user;
+    });
+  }
 
   private loadMenu(): void {
     this.configService.getConfig().subscribe((config) => {
       this.menu = config.menu.map(item => {
-        
+
         console.log("Changed menu items routes")
         return item;
       });
@@ -49,5 +51,9 @@ export class HeaderComponent {
 
   goToLogout(): void {
     this.authService.logout();
+  }
+
+  ngOnDestroy(): void {
+    this.userSub.unsubscribe();
   }
 }

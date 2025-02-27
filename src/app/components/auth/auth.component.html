@@ -1,6 +1,6 @@
 <div class="background-container">
   <div class="auth-container">
-    <form class="form" (ngSubmit)="onSubmit()">
+    <form #authForm="ngForm" class="form" (ngSubmit)="onSubmit(authForm)">
       <h2 id="heading">{{ isRegistering ? "Register" : "Login" }}</h2>
       <input
         class="input"
@@ -16,25 +16,26 @@
         placeholder="Password"
         type="password"
       />
+      <input
+        *ngIf="isRegistering"
+        class="input"
+        [(ngModel)]="confirmPassword"
+        name="confirmPassword"
+        placeholder="Confirm Password"
+        type="password"
+      />
+      <div class="button-container">
+        <button class="button-confirm" type="submit">
+          {{ isRegistering ? "Sign Up" : "Login" }}
+        </button>
 
-      <button class="button-confirm">
-        {{ isRegistering ? "Sign up" : "Login" }}
-      </button>
-      <div *ngIf="!isRegistering">
-        <p>
-          <a (click)="toggleMode()">
-            {{
-              isRegistering
-                ? "Already have an account? Login"
-                : "No account? Sign up."
-            }}
-          </a>
-
-          <a (click)="resetPassword()">"Forgot password?"</a>
-
-        
-        </p>
+        <button class="button-confirm" (click)="toggleMode()" type="button">
+          Switch to {{ isRegistering ? "Login" : "Sign Up" }}
+        </button>
       </div>
+      <p>
+        <a class="reset" (click)="resetPassword()">"Forgot password?"</a>
+      </p>
     </form>
   </div>
 </div>

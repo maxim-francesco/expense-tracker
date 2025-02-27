@@ -537,6 +537,8 @@ p {
 }
 
 .expense-list {
+    max-height: 150px;
+    overflow-y: auto;
     background: white;
     padding: 10px;
     border: 2px solid black;
@@ -582,7 +584,7 @@ p {
     font-size: 14px;
     font-weight: bold;
     color: black;
-    background-color: #ffc107;
+    background-color: #ffc107; 
     box-shadow: 3px 3px 0 black;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -597,6 +599,9 @@ p {
     background-color: #e6b800;
 }
 
+.clickable-day {
+    cursor: pointer;
+}
 
 @media screen and (max-width: 768px) {
     .background-container {
@@ -729,66 +734,5 @@ p {
         justify-content: center;
         align-items: flex-start;
         overflow-y: auto;
-    }
-
-    .expense-list {
-        width: 100%;
-        padding: 10px;
-        box-sizing: border-box;
-        background: white;
-        border: 2px solid black;
-        margin-top: 10px;
-        box-shadow: 3px 3px 0 black;
-    }
-
-    .expense-item {
-        display: flex;
-        flex-direction: column;
-        padding: 8px;
-        border-bottom: 1px solid black;
-    }
-
-    .expense-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin-bottom: 5px;
-    }
-
-    .delete-btn,
-    .edit-btn {
-        padding: 5px 7px;
-        font-size: 10px;
-        flex: 1;
-        font-weight: bold;
-        margin: 0 7px;
-        margin-right: 5px;
-    }
-
-    .expense-amount {
-        font-size: 12px;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-    }
-
-    .expense-name {
-        font-size: 14px;
-    }
-
-    .expense-category {
-        font-size: 10px;
-    }
-
-    .tabs {
-        margin-bottom: 10px;
-    }
-    
-    .tab-button {
-        padding: 5px 8px;
-        border: 2px solid #000000;
-        margin: 0 2px;
     }
 }
