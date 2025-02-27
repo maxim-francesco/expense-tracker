@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from '../../models/expense.model';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 @Component({
   selector: 'app-tracker',
@@ -13,11 +14,12 @@ import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from
   styleUrls: ['./tracker.component.css']
 })
 export class TrackerComponent implements OnInit {
-  @ViewChild('expName') expNameInput!: ElementRef;
-  @ViewChild('expAmount') expAmountInput!: ElementRef;
-  @ViewChild('expCategory') expCategorySelect!: ElementRef;
-  @ViewChild('expAmount') expAmount!: ElementRef;
+
   errorMessage: string = '';
+  selectedCategory: string = '';
+  isSaveDisabled: boolean = true;
+  expenseName: string = '';
+  expenseAmount: number | null = null;
 
   dailyTotals: { [key in DayOfWeek]: number } = {
     Monday: 0,
@@ -57,10 +59,11 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
+
   expendedDay: DayOfWeek | null = null;
   expendedDayExpenses: Expense[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private cdr: ChangeDetectorRef) { }
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private cdr: ChangeDetectorRef, private confirmDialogService: ConfirmDialogService) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -115,24 +118,49 @@ export class TrackerComponent implements OnInit {
     this.dailyExpenses = await this.crudService.getByDay(day);
   }
 
+  validateFormAtSave() {
+    this.isSaveDisabled = !this.selectedCategory ||
+                          !this.expenseName ||
+                          !this.expenseAmount ||
+                          this.expenseAmount <= 0;
+  }
+  validateFormAtUpdate() {
+    this.isSaveDisabled = false;
+  }
+
   async saveExpense(day: DayOfWeek) {
-    this._newExpense.name = this.expNameInput.nativeElement.value;
-    this._newExpense.category = this.expCategorySelect.nativeElement.value;
-    this._newExpense.amount = parseFloat(this.expAmountInput.nativeElement.value);
+    this._newExpense.name = this.expenseName;
+    console.log(this.expenseName);
+    this._newExpense.category = this.selectedCategory as Category;
+    this._newExpense.amount = this.expenseAmount!;
     this.showExpenseForm = false;
+    this.resetForm();
     await this.crudService.addItem(day, this._newExpense);
-    this.ngOnInit();
+    // this.ngOnInit();
+    this.getExpensesByDay(this.selectedDay);
+    // this.resetForm();
   }
 
   async deleteExpense(id: string) {
-    await this.crudService.deleteItem(this.selectedDay, id);
-    this.ngOnInit();
+    // const confirmation = confirm(`Are you sure you want to delete?`);
+    // if (confirmation) {
+    //   await this.crudService.deleteItem(this.selectedDay, id);
+    //   this.getExpensesByDay(this.selectedDay);
+    // }
+    this.confirmDialogService.confirm({
+      message: 'Are you sure you want to delete this expense?'
+    }).subscribe(async (confirmed) => {
+      if (confirmed) {
+        await this.crudService.deleteItem(this.selectedDay, id);
+        this.getExpensesByDay(this.selectedDay);
+      }
+    });
   }
 
   resetForm() {
-    this.expNameInput.nativeElement.value = "";
-    this.expCategorySelect.nativeElement.value = "";
-    this.expAmountInput.nativeElement.value = "";
+    this.expenseName = "";
+    this.selectedCategory = "";
+    this.expenseAmount = null;
     this.isEditing = false;
     this.editingExpenseId = null;
   }
@@ -146,20 +174,22 @@ export class TrackerComponent implements OnInit {
     this.showExpenseForm = true;
 
     setTimeout(() => {
-      this.expNameInput.nativeElement.value = expense.name;
-      this.expCategorySelect.nativeElement.value = expense.category;
-      this.expAmountInput.nativeElement.value = expense.amount;
+      this.expenseName = expense.name;
+      this.selectedCategory = expense.category;
+      this.expenseAmount = expense.amount;
     }, 0);
+    this.isSaveDisabled = true;
   }
 
   async updateExpense() {
+
     if (!this.isEditing || !this.editingExpenseId)
       return;
 
     const updatedExpense: UpdateExpenseDTO = {
-      name: this.expNameInput.nativeElement.value,
-      category: this.expCategorySelect.nativeElement.value,
-      amount: parseFloat(this.expAmountInput.nativeElement.value)
+      name: this.expenseName,
+      category: this.selectedCategory as Category,
+      amount: this.expenseAmount!
     };
 
     // console.log("Updated values are: Name: ", updatedExpense.name, " Amount: ", updatedExpense.amount, " Category: ", updatedExpense.category)
@@ -193,6 +223,17 @@ export class TrackerComponent implements OnInit {
     const today = new Date();
     // return this.selectedDay > this.days[today.getDay() - 1];
     return this.days.indexOf(this.selectedDay) > this.days.indexOf(this.days[today.getDay() - 1]);
+  }
+
+  isFutureDay(day: DayOfWeek): boolean {
+    const today = new Date();
+    const dayIndex = this.days.indexOf(day);
+    const todayIndex = today.getDay() - 1; // getDay() returns 0 (Sunday) to 6 (Saturday), so adjust for array indexing
+    if (todayIndex < 0) {
+      // Adjust for when today is Sunday (index -1 in our array)
+      return dayIndex !== 0;
+    }
+    return dayIndex > todayIndex;
   }
 
   isDayAvailable(day: DayOfWeek): boolean {
