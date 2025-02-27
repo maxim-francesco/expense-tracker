@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { TrackerConfigService, TrackerConfig } from '../../services/tracker-config.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -59,7 +59,11 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private confirmDialogService: ConfirmDialogService) { }
+
+  expendedDay: DayOfWeek | null = null;
+  expendedDayExpenses: Expense[] = [];
+
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private cdr: ChangeDetectorRef, private confirmDialogService: ConfirmDialogService) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -283,5 +287,17 @@ export class TrackerComponent implements OnInit {
     }
 
     return false;
+  }
+
+  toggleDayExpenses(day: DayOfWeek) {
+    if (this.expendedDay === day) {
+      this.expendedDay = null;
+      this.expendedDayExpenses = [];
+    } else {
+      this.expendedDay = day;
+      this.getExpensesByDay(day);
+      this.cdr.detectChanges();
+      this.expendedDayExpenses = [...this.dailyExpenses];
+    }
   }
 }
