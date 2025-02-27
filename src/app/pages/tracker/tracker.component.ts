@@ -4,8 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from '../../models/expense.model';
-import { MatDialog } from '@angular/material/dialog';
-
 @Component({
   selector: 'app-tracker',
   standalone: true,
@@ -59,7 +57,7 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private dialog: MatDialog) { }
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
