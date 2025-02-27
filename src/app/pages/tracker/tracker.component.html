@@ -4,28 +4,22 @@
             <div class="head">
                 {{ showWeeklyOverview ? 'Weekly Overview' : (showExpenseForm ? 'Add Expense' : 'Expense Tracker') }}
             </div>
+            <!-- Tabs for weekdays -->
+            <div class="tabs">
+                <button *ngFor="let day of days" class="tab-button" [class.active]="selectedDay === day"
+                    [class.unavailable]="!isDayAvailable(day)"
+                    (click)="selectedDay = day; getExpensesByDay(selectedDay);">
+                    {{ day }}
+                </button>
+            </div>
+
             <div class="content">
                 <ng-container *ngIf="!showWeeklyOverview">
-
-                    <!-- Tabs for weekdays -->
-                    <div class="tabs">
-                        <button *ngFor="let day of days" class="tab-button" [class.active]="selectedDay === day"
-                            (click)="selectedDay = day; getExpensesByDay(selectedDay);">
-                            {{ day }}
-                        </button>
-                    </div>
 
                     <div class="button-bar">
                         <button class="button" (click)="toggleExpenseForm()" [disabled]="checkDay()">
                             {{ showExpenseForm ? 'Back' : 'Add Expense' }}
                         </button>
-                        <!-- <button class="button save-button" *ngIf="showExpenseForm" (click)="saveExpense(selectedDay)">Save</button> -->
-                        <button class="button save-button" *ngIf="showExpenseForm"
-                            (click)="isEditing ? updateExpense() : saveExpense(selectedDay)">
-                            {{ isEditing ? 'Update' : 'Save' }}
-                        </button>
-
-
                     </div>
 
                     <!-- Expense Form -->
@@ -58,14 +52,18 @@
                             </div>
 
                             <label>Amount:</label>
-                            <input #expAmount type="number"
-                                    placeholder="Enter an amount"
-                                    (input)="validateAmount($event)"
-                                    (keypress)="onKeyPress($event)"
-                                    step="0.01" min="0.01" />
+                            <input #expAmount type="number" placeholder="Enter an amount"
+                                (input)="validateAmount($event)" (keypress)="onKeyPress($event)" step="0.01"
+                                min="0.01" />
                         </div>
                     </ng-container>
 
+                    <div class="button-bar">
+                        <button class="button save-button" *ngIf="showExpenseForm"
+                            (click)="isEditing ? updateExpense() : saveExpense(selectedDay)">
+                            {{ isEditing ? 'Update' : 'Save' }}
+                        </button>
+                    </div>
                     <!-- Expense List -->
                     <ng-container *ngIf="!showExpenseForm">
                         <div class="expense-list">

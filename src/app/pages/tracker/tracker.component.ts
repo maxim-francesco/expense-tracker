@@ -150,7 +150,7 @@ export class TrackerComponent implements OnInit {
   }
 
   async updateExpense() {
-    if (!this.isEditing || !this.editingExpenseId) 
+    if (!this.isEditing || !this.editingExpenseId)
       return;
 
     const updatedExpense: UpdateExpenseDTO = {
@@ -192,6 +192,12 @@ export class TrackerComponent implements OnInit {
     return this.days.indexOf(this.selectedDay) > this.days.indexOf(this.days[today.getDay() - 1]);
   }
 
+  isDayAvailable(day: DayOfWeek): boolean {
+    const todayIndex = this.days.indexOf(this.getCurrentDay());
+    const dayIndex = this.days.indexOf(day);
+    return dayIndex <= todayIndex;
+  }
+
   loadCategories(): void { }
 
   addCategory(): void { }
@@ -227,10 +233,10 @@ export class TrackerComponent implements OnInit {
     const inputValue = (event.target as HTMLInputElement).value;
 
     if ([46, 8, 9, 27, 13].indexOf(charCode) !== -1 ||
-        (charCode === 65 && event.ctrlKey === true) ||
-        (charCode === 67 && event.ctrlKey === true) ||
-        (charCode === 86 && event.ctrlKey === true) ||
-        (charCode === 88 && event.ctrlKey === true)) {
+      (charCode === 65 && event.ctrlKey === true) ||
+      (charCode === 67 && event.ctrlKey === true) ||
+      (charCode === 86 && event.ctrlKey === true) ||
+      (charCode === 88 && event.ctrlKey === true)) {
       return true;
     }
 
