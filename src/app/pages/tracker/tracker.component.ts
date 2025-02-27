@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from '../../models/expense.model';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+
 @Component({
   selector: 'app-tracker',
   standalone: true,
@@ -57,7 +59,7 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService) { }
+  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private confirmDialogService: ConfirmDialogService) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -136,11 +138,19 @@ export class TrackerComponent implements OnInit {
   }
 
   async deleteExpense(id: string) {
-    const confirmation = confirm(`Are you sure you want to delete?`);
-    if (confirmation) {
-      await this.crudService.deleteItem(this.selectedDay, id);
-      this.getExpensesByDay(this.selectedDay);
-    }
+    // const confirmation = confirm(`Are you sure you want to delete?`);
+    // if (confirmation) {
+    //   await this.crudService.deleteItem(this.selectedDay, id);
+    //   this.getExpensesByDay(this.selectedDay);
+    // }
+    this.confirmDialogService.confirm({
+      message: 'Are you sure you want to delete this expense?'
+    }).subscribe(async (confirmed) => {
+      if (confirmed) {
+        await this.crudService.deleteItem(this.selectedDay, id);
+        this.getExpensesByDay(this.selectedDay);
+      }
+    });
   }
 
   resetForm() {
