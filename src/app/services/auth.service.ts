@@ -3,8 +3,7 @@ import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { BehaviorSubject, tap } from "rxjs";
 import { User } from "../models/user.model";
-
-
+import { firebaseConfig } from "../../environment";
 
 interface AuthResponseData {
     idToken: string,
@@ -19,10 +18,10 @@ interface AuthResponseData {
 
 export class AuthService {
 
-    private apiKey = "AIzaSyDmGuH_3Nb-RzBp0pS1xKA5wmYdbVNuruc";
+    private apiKey = firebaseConfig.apiKey;
     user = new BehaviorSubject<User | null>(null);
 
-    constructor(private http: HttpClient, private router: Router) { 
+    constructor(private http: HttpClient, private router: Router) {
         this.autoLogin();
     }
 
@@ -43,7 +42,7 @@ export class AuthService {
             returnSecureToken: true
 
         }).pipe(tap(response => {
-            this.handleAuthentication(response.email, response.localId, response.idToken, +response.expiresIn);
+            this.handleAuthentication(response.email, response.localId, response.idToken, +response.expiresIn, response.localId);
            // this.user.next(response);
             this.router.navigate(['track']);
         }))
@@ -73,9 +72,9 @@ export class AuthService {
 
     }
 
-    private handleAuthentication(email: string, userId: string, token: string, expiresIn: number) {
+    private handleAuthentication(email: string, userId: string, token: string, expiresIn: number, uid: string) {
         const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
-        const user = new User(email, userId, token, expirationDate);
+        const user = new User(email, userId, token, expirationDate, uid);
         this.user.next(user);
         localStorage.setItem('userData', JSON.stringify(user)); // Store user in local storage
     }
@@ -94,7 +93,8 @@ export class AuthService {
             userData.email,
             userData.id,
             userData._token,
-            new Date(userData._tokenExpirationDate)
+            new Date(userData._tokenExpirationDate),
+            userData.id
         );
         if (loadedUser.token) {
             this.user.next(loadedUser);

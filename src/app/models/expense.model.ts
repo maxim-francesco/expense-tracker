@@ -7,9 +7,12 @@ export interface Expense {
   name: string;
   category: Category;
   amount: number;
+  userId: string;
 }
 
-export type CreateExpenseDTO = Omit<Expense, 'id'>;
+export interface CreateExpenseDTO extends Omit<Expense, 'id'> {
+  userId: string;
+}
 
 export type UpdateExpenseDTO = Partial<CreateExpenseDTO>;
 
@@ -17,4 +20,5 @@ export interface FirestoreExpenseDoc {
   name: string;
   category: Category;
   amount: number;
+  userId: string;
 }

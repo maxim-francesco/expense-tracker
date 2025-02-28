@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, getDocs, query, where, doc, deleteDoc, updateDoc, addDoc } from '@angular/fire/firestore';
 import { Expense, DayOfWeek, CreateExpenseDTO, UpdateExpenseDTO, FirestoreExpenseDoc, Category } from '../models/expense.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,17 @@ export class CrudService {
 
   private firestore: Firestore = inject(Firestore);
 
+  constructor(private authService: AuthService) { }
+
+  /**
+ * Gets the current user ID
+ * @returns The current user ID or null if no user is logged in
+ */
+  private getCurrentUserId(): string | null {
+    const currentUser = this.authService.user.getValue();
+    return currentUser?.uid || null;
+  }
+
   /**
 * Inserts an Item for the specified params
 * @param day - The day of the week (e.g., 'monday', 'tuesday')
@@ -20,9 +32,16 @@ export class CrudService {
 */
   async addItem(day: DayOfWeek, expense: CreateExpenseDTO): Promise<string | null> {
     try {
-      const docRef = await addDoc(collection(this.firestore, day), {
-        ...expense
-      });
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return null;
+      }
+      const expenseWithUserId = {
+        ...expense,
+        userId
+      };
+      const docRef = await addDoc(collection(this.firestore, day), expenseWithUserId);
       return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -37,7 +56,19 @@ export class CrudService {
   */
   async getByDay(day: DayOfWeek): Promise<Expense[]> {
     try {
-      const querySnapshot = await getDocs(collection(this.firestore, day));
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return [];
+      }
+
+      // Create a query to filter by userId
+      const q = query(
+        collection(this.firestore, day),
+        where("userId", "==", userId)
+      );
+
+      const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -56,15 +87,24 @@ export class CrudService {
  */
   async getByDayAndCategory(day: DayOfWeek, category: Category): Promise<Expense[]> {
     try {
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return [];
+      }
+
       const q = query(
         collection(this.firestore, day),
-        where("category", "==", category)
+        where("category", "==", category),
+        where("userId", "==", userId)
       );
+
       const querySnapshot = await getDocs(q);
       const items = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       } as Expense));
+
       console.log(`Items for ${day} in category ${category}:`, items);
       return items;
     } catch (error) {
@@ -80,13 +120,21 @@ export class CrudService {
 */
   async getByCategoryAllDays(category: Category): Promise<Expense[]> {
     try {
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return [];
+      }
+
       const allItems: Expense[] = [];
 
       for (const day of this.days) {
         const q = query(
           collection(this.firestore, day),
-          where("category", "==", category)
+          where("category", "==", category),
+          where("userId", "==", userId)
         );
+
         const querySnapshot = await getDocs(q);
         const items = querySnapshot.docs.map(doc => ({
           id: doc.id,

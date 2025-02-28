@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import { CreateExpenseDTO, DayOfWeek, Expense, UpdateExpenseDTO, Category } from '../../models/expense.model';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tracker',
@@ -44,11 +46,14 @@ export class TrackerComponent implements OnInit {
 
   isEditing = false;
   editingExpenseId: string | null = null;
+  currentUserId: string = '';
+
 
   _newExpense: CreateExpenseDTO = {
     name: '',
     category: 'Groceries',
-    amount: 0
+    amount: 0,
+    userId: ''
   };
 
   _updates: UpdateExpenseDTO = {
@@ -59,11 +64,15 @@ export class TrackerComponent implements OnInit {
 
   expense: any[] = [];
 
-
   expendedDay: DayOfWeek | null = null;
   expendedDayExpenses: Expense[] = [];
 
-  constructor(private trackerConfigService: TrackerConfigService, private crudService: CrudService, private cdr: ChangeDetectorRef, private confirmDialogService: ConfirmDialogService) { }
+  constructor(private trackerConfigService: TrackerConfigService,
+              private crudService: CrudService,
+              private cdr: ChangeDetectorRef,
+              private confirmDialogService: ConfirmDialogService,
+              private authService: AuthService,
+              private router: Router) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -72,6 +81,11 @@ export class TrackerComponent implements OnInit {
       this.getExpensesByDay(this.selectedDay);
     });
     this.getDailyTotal();
+    this.authService.user.subscribe(user => {
+      if (user) {
+        this.currentUserId = user?.uid;
+      }
+    })
   }
 
   toggleCategoryPopup() {
@@ -130,30 +144,23 @@ export class TrackerComponent implements OnInit {
 
   async saveExpense(day: DayOfWeek) {
     this._newExpense.name = this.expenseName;
-    console.log(this.expenseName);
     this._newExpense.category = this.selectedCategory as Category;
     this._newExpense.amount = this.expenseAmount!;
+    this._newExpense.userId = this.currentUserId;
     this.showExpenseForm = false;
     this.resetForm();
     await this.crudService.addItem(day, this._newExpense);
-    await this.getDailyTotal(); 
-    // this.ngOnInit();
+    await this.getDailyTotal();
     this.getExpensesByDay(this.selectedDay);
-    // this.resetForm();
   }
 
   async deleteExpense(id: string) {
-    // const confirmation = confirm(`Are you sure you want to delete?`);
-    // if (confirmation) {
-    //   await this.crudService.deleteItem(this.selectedDay, id);
-    //   this.getExpensesByDay(this.selectedDay);
-    // }
     this.confirmDialogService.confirm({
       message: 'Are you sure you want to delete this expense?'
     }).subscribe(async (confirmed) => {
       if (confirmed) {
         await this.crudService.deleteItem(this.selectedDay, id);
-        await this.getDailyTotal(); 
+        await this.getDailyTotal();
         this.getExpensesByDay(this.selectedDay);
       }
     });
@@ -194,11 +201,9 @@ export class TrackerComponent implements OnInit {
       amount: this.expenseAmount!
     };
 
-    // console.log("Updated values are: Name: ", updatedExpense.name, " Amount: ", updatedExpense.amount, " Category: ", updatedExpense.category)
-
     await this.crudService.updateItem(this.selectedDay, this.editingExpenseId, updatedExpense);
-    await this.getDailyTotal(); 
-    
+    await this.getDailyTotal();
+
     this.isEditing = false;
     this.editingExpenseId = null;
     this.toggleExpenseForm();
@@ -224,7 +229,6 @@ export class TrackerComponent implements OnInit {
 
   checkDay(): boolean {
     const today = new Date();
-    // return this.selectedDay > this.days[today.getDay() - 1];
     return this.days.indexOf(this.selectedDay) > this.days.indexOf(this.days[today.getDay() - 1]);
   }
 
@@ -298,7 +302,7 @@ export class TrackerComponent implements OnInit {
       this.expendedDayExpenses = [];
     } else {
       this.expendedDay = day;
-      this.expendedDayExpenses = await this.crudService.getByDay(day);     
+      this.expendedDayExpenses = await this.crudService.getByDay(day);
       this.cdr.detectChanges();
     }
   }
