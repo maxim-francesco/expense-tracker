@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, getDocs, query, where, doc, deleteDoc, updateDoc, addDoc } from '@angular/fire/firestore';
 import { Expense, DayOfWeek, CreateExpenseDTO, UpdateExpenseDTO, FirestoreExpenseDoc, Category } from '../models/expense.model';
 import { AuthService } from './auth.service';
+import { timestamp } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -37,11 +38,12 @@ export class CrudService {
         console.error('No user is logged in');
         return null;
       }
-      const expenseWithUserId = {
+      const expenseWithUserIdAndTime = {
         ...expense,
-        userId
+        userId,
+        timestamp: Date.now()
       };
-      const docRef = await addDoc(collection(this.firestore, day), expenseWithUserId);
+      const docRef = await addDoc(collection(this.firestore, day), expenseWithUserIdAndTime);
       return docRef.id;
     } catch (e) {
       console.error('Error adding document: ', e);
@@ -69,10 +71,13 @@ export class CrudService {
       );
 
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
+      const expenses = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       } as Expense));
+
+      return expenses.sort((a, b) => b.timestamp - a.timestamp);
+
     } catch (error) {
       console.error('Error getting documents:', error);
       return [];
