@@ -136,6 +136,7 @@ export class TrackerComponent implements OnInit {
     this.showExpenseForm = false;
     this.resetForm();
     await this.crudService.addItem(day, this._newExpense);
+    await this.getDailyTotal(); 
     // this.ngOnInit();
     this.getExpensesByDay(this.selectedDay);
     // this.resetForm();
@@ -152,6 +153,7 @@ export class TrackerComponent implements OnInit {
     }).subscribe(async (confirmed) => {
       if (confirmed) {
         await this.crudService.deleteItem(this.selectedDay, id);
+        await this.getDailyTotal(); 
         this.getExpensesByDay(this.selectedDay);
       }
     });
@@ -195,7 +197,8 @@ export class TrackerComponent implements OnInit {
     // console.log("Updated values are: Name: ", updatedExpense.name, " Amount: ", updatedExpense.amount, " Category: ", updatedExpense.category)
 
     await this.crudService.updateItem(this.selectedDay, this.editingExpenseId, updatedExpense);
-
+    await this.getDailyTotal(); 
+    
     this.isEditing = false;
     this.editingExpenseId = null;
     this.toggleExpenseForm();
@@ -289,15 +292,14 @@ export class TrackerComponent implements OnInit {
     return false;
   }
 
-  toggleDayExpenses(day: DayOfWeek) {
+  async toggleDayExpenses(day: DayOfWeek) {
     if (this.expendedDay === day) {
       this.expendedDay = null;
       this.expendedDayExpenses = [];
     } else {
       this.expendedDay = day;
-      this.getExpensesByDay(day);
+      this.expendedDayExpenses = await this.crudService.getByDay(day);     
       this.cdr.detectChanges();
-      this.expendedDayExpenses = [...this.dailyExpenses];
     }
   }
 }
