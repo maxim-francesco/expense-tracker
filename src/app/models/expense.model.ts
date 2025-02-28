@@ -8,6 +8,7 @@ export interface Expense {
   category: Category;
   amount: number;
   userId: string;
+  timestamp: number;
 }
 
 export interface CreateExpenseDTO extends Omit<Expense, 'id'> {
@@ -21,4 +22,5 @@ export interface FirestoreExpenseDoc {
   category: Category;
   amount: number;
   userId: string;
+  timestamp: number;
 }

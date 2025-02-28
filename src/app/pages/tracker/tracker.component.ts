@@ -53,7 +53,8 @@ export class TrackerComponent implements OnInit {
     name: '',
     category: 'Groceries',
     amount: 0,
-    userId: ''
+    userId: '',
+    timestamp: 0
   };
 
   _updates: UpdateExpenseDTO = {
@@ -198,7 +199,8 @@ export class TrackerComponent implements OnInit {
     const updatedExpense: UpdateExpenseDTO = {
       name: this.expenseName,
       category: this.selectedCategory as Category,
-      amount: this.expenseAmount!
+      amount: this.expenseAmount!,
+      timestamp: Date.now()
     };
 
     await this.crudService.updateItem(this.selectedDay, this.editingExpenseId, updatedExpense);
