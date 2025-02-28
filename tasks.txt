@@ -1,11 +1,27 @@
-* reset password in componenta auth, nu alerts. register & forgot password nu par link-uri/butoane
+Autentificare >>>
+* reset password in componenta auth, nu prin window alerts
+* register & forgot password nu par link-uri/butoane, trebuie modificat mouse indicator-ul
+* register cu confirmare pe email
+* cimp nou pentru confirm password la register
+* keep the user logged in at refresh
+
+Routes >>>
+* redirect pe tracker la login
+
+UI/UX >>>
 * mobile friendly
-* azi este marti, deci as putea sa introduc cheltuieli doar pentru luni si marti. maine ma va lasa si pentru miercuri si asa mai departe
-* edit pe cheltuieli
-* Summary unde sa vad toate cheltuielile din saptamana respectiva ?????
-(V2) -> * pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
-(V2) -> * Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;
-(V2) -> * Weekly budget: The starting page of the app should prompt the user to enter their weekly budget. The “Summary” tab should display the user’s weekly savings;
-(V2) -> * Export expenses: The user should be able to export their weekly expenses in Excel format;
-(V2) -> * Expense history: The user should be able to access a detailed history of their expenses from previous weeks.
-(V3) -> * AI pentru recunoastere automata cheltuieli din poze
+* error + notification handling 
+
+Tracker >>>
+* add userId pe cheltuieli
+* timestamp + afisare in ordine 
+* add/update/delete pe categories
+* add view cu cheltuieli pe weekly overview
+
+(V2) -> pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
+(V2) -> Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;
+(V2) -> Weekly budget: The starting page of the app should prompt the user to enter their weekly budget. The “Summary” tab should display the user’s weekly savings;
+(V2) -> Export expenses: The user should be able to export their weekly expenses in Excel format;
+(V2) -> Expense history: The user should be able to access a detailed history of their expenses from previous weeks.
+
+(V3) -> AI pentru recunoastere automata cheltuieli din poze
