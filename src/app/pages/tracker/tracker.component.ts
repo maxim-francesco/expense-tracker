@@ -236,12 +236,6 @@ export class TrackerComponent implements OnInit {
     return dayIndex > todayIndex;
   }
 
-  isDayAvailable(day: DayOfWeek): boolean {
-    const todayIndex = this.days.indexOf(this.getCurrentDay());
-    const dayIndex = this.days.indexOf(day);
-    return dayIndex <= todayIndex;
-  }
-
   loadCategories(): void { }
 
   addCategory(): void { }
