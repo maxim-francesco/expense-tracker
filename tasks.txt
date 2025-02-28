@@ -1,22 +1,11 @@
-Autentificare >>>
-* reset password in componenta auth, nu prin window alerts
-* register & forgot password nu par link-uri/butoane, trebuie modificat mouse indicator-ul
-* register cu confirmare pe email
-* cimp nou pentru confirm password la register
-* keep the user logged in at refresh
-
-Routes >>>
-* redirect pe tracker la login
-
 UI/UX >>>
 * mobile friendly
+* larger view card
 * error + notification handling 
 
 Tracker >>>
-* add userId pe cheltuieli
 * timestamp + afisare in ordine 
 * add/update/delete pe categories
-* add view cu cheltuieli pe weekly overview
 
 (V2) -> pentru lista de categorii trebuie un loc separat unde sa le pot adauga si sterge (si edita dar e mai complicat, vezi mai sus)
 (V2) -> Pie Chart: The “Summary” tab should include a pie chart showcasing the expenses by category;
