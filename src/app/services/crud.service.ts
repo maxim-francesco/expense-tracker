@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, getDocs, query, where, doc, deleteDoc, updateDoc, addDoc } from '@angular/fire/firestore';
 import { Expense, DayOfWeek, CreateExpenseDTO, UpdateExpenseDTO, FirestoreExpenseDoc, Category } from '../models/expense.model';
 import { AuthService } from './auth.service';
+import { DecimalPipe } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,8 @@ export class CrudService {
   private readonly categories: Category[] = ['Groceries', 'Taxes', 'Entertainment', 'Education', 'Clothing', 'Healthcare', 'Sports', 'Travel', 'Gifts', 'Miscellaneous'];
 
   private firestore: Firestore = inject(Firestore);
+
+  private decimalPipe : DecimalPipe = new DecimalPipe('en-US');
 
   constructor(private authService: AuthService) { }
 
@@ -216,4 +219,5 @@ export class CrudService {
 
     return dailyTotals;
   }
+
 }
