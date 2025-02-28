@@ -17,7 +17,8 @@ export class AuthComponent {
   isRegistering = false;
   confirmPassword = '';
   isAuthenticated = false;
-
+  isResetting = false;
+  resetMessage: string = '';
 
   constructor(
     private router: Router,
@@ -33,6 +34,14 @@ export class AuthComponent {
   toggleMode() {
     this.isRegistering = !this.isRegistering;
     this.confirmPassword = '';
+    this.isResetting = false;
+    this.resetMessage = '';
+  }
+
+  toggleReset() {
+    this.isResetting = !this.isResetting;
+    this.isRegistering = false;
+    this.resetMessage = '';
   }
 
   onSubmit(form: NgForm) {
@@ -40,44 +49,56 @@ export class AuthComponent {
       return;
     }
 
-    if (this.isRegistering) {
+    if (this.isResetting) {
+      this.authService.resetPassword(this.email).subscribe(
+        () => {
+          this.resetMessage = "Password reset link has been sent to your email.";
+        },
+        error => {
+          console.error(error);
+          this.resetMessage = "Error: Unable to send reset email.";
+        }
+      );
+    } else if (this.isRegistering) {
       if (this.password !== this.confirmPassword) {
-        alert('Passwords do not match')//aici sa pui mesaj nu alerta
+        this.resetMessage = "Passwords do not match!";
         return;
       }
-      //sign up user
+
       this.authService.signup(this.email, this.password).subscribe({
-        next: (response => {
+        next: response => {
           console.log('User registered', response);
           this.isRegistering = false;
-        })
-      })
-    }
-    else {
-      //log in user
+          this.resetMessage = "Account created! Please log in.";
+        }
+      });
+    } else {
       this.authService.login(this.email, this.password).subscribe({
-        next: (response => {
+        next: response => {
           console.log('User logged in!', response);
-          //this.authService.user.next(response);
           this.router.navigate(['/track']);
-        })
-      })
-    }
-
-    form.reset();
-
-  }
-
-  resetPassword() {
-    const email = prompt("Please enter your email for password reset:");
-    if (email) {
-      this.authService.resetPassword(email).subscribe(() => {
-        alert("Password reset link has been sent to your email.");
-      }, (error) => {
-        console.error(error);
+        }
       });
     }
 
+    form.reset();
+  }
+
+  resetPassword() {
+    if (!this.email) {
+      this.resetMessage = "Please enter your email.";
+      return;
+    }
+
+    this.authService.resetPassword(this.email).subscribe(
+      () => {
+        this.resetMessage = "Password reset link has been sent to your email!";
+      },
+      (error) => {
+        console.error(error);
+        this.resetMessage = "Unable to send reset email.";
+      }
+    );
   }
 
 }

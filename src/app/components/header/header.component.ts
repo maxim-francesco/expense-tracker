@@ -19,6 +19,7 @@ export class HeaderComponent {
   sticky = false;
   isAuthenticated = false;
   private userSub!: Subscription;
+  menuOpen = false;
 
   constructor(
     private configService: ConfigService,
@@ -47,13 +48,23 @@ export class HeaderComponent {
 
   goToLogin(): void {
     this.router.navigate(['/auth']);
+    this.closeMenu();
   }
 
   goToLogout(): void {
     this.authService.logout();
+    this.closeMenu();
   }
 
   ngOnDestroy(): void {
     this.userSub.unsubscribe();
+  }
+
+  toggleMenu(): void {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu(): void {
+    this.menuOpen = false;
   }
 }
