@@ -4,7 +4,6 @@ UI/UX >>>
 * error + notification handling 
 
 Tracker >>>
-* add userId pe cheltuieli
 * timestamp + afisare in ordine 
 * add/update/delete pe categories
 
