@@ -37,14 +37,20 @@
               {{ showExpenseForm ? "Back" : "Add Expense" }}
             </button>
 
-            <button class="button" (click)="geminiTest()">
-              Upload Receipt
-            </button>
-
             <!-- <button class="button save-button" *ngIf="showExpenseForm" (click)="saveExpense(selectedDay)">Save</button> -->
             <button class="button save-button" (click)="toggleWeeklyOverview()">
               Weekly Overview
             </button>
+          </div>
+
+          <div class="upload-receipt">
+            <input
+              placeholder="Upload Receipt"
+              class="button"
+              type="file"
+              accept="image/*"
+            />
+            <button class="button">Extract Expenses</button>
           </div>
 
           <!-- Expense Form -->
