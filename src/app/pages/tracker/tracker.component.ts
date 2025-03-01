@@ -21,6 +21,7 @@ import {
 } from '../../models/expense.model';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PieComponent } from '../../components/pie/pie.component';
+import { ExcelService } from '../../services/excel.service';
 
 @Component({
   selector: 'app-tracker',
@@ -97,12 +98,24 @@ export class TrackerComponent implements OnInit {
   expendedDay: DayOfWeek | null = null;
   expendedDayExpenses: Expense[] = [];
 
+  // dummy data
+  data = [
+    { Name: 'John Doe', Age: 30, City: 'New York' },
+    { Name: 'Jane Smith', Age: 25, City: 'San Francisco' },
+    // Add more data as needed
+  ];
+
   constructor(
     private trackerConfigService: TrackerConfigService,
     private crudService: CrudService,
     private cdr: ChangeDetectorRef,
-    private confirmDialogService: ConfirmDialogService
+    private confirmDialogService: ConfirmDialogService,
+    private excelService: ExcelService
   ) {}
+
+  exportToExcel(): void {
+    this.excelService.generateExcel(this.data, 'user_data');
+  }
 
   ngOnInit() {
     this.trackerConfigService
