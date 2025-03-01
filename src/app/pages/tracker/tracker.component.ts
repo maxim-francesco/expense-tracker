@@ -269,7 +269,7 @@ export class TrackerComponent implements OnInit {
     if (this.newCategory.trim() === '') return;
     const existingCategory = this.categories.find(cat => cat.name.toLowerCase() === this.newCategory.toLowerCase());
     if (existingCategory) {
-      alert('Category already exists!');
+      //alert('Category already exists!');
       return;
     }
 
@@ -283,7 +283,7 @@ export class TrackerComponent implements OnInit {
 
   editCategory(category: Category) {
     if (category.isDefault) {
-      alert("You cannot edit default categories!");
+      //alert("You cannot edit default categories!");
       return;
     }
     this.editingCategory = category.id;
@@ -306,7 +306,7 @@ export class TrackerComponent implements OnInit {
 
   async deleteCategory(category: { id: string, isDefault: boolean }) {
     if (category.isDefault) {
-      alert("You cannot delete default categories!");
+     // alert("You cannot delete default categories!");
       return;
     }
     const success = await this.crudService.deleteCategory(category.id, category.isDefault);
