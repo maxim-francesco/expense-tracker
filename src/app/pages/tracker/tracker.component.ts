@@ -20,11 +20,12 @@ import {
   Category,
 } from '../../models/expense.model';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { PieComponent } from '../../components/pie/pie.component';
 
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PieComponent],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })

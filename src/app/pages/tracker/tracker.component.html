@@ -197,7 +197,14 @@
 
         <!-- here goes analysis -->
         <ng-container *ngIf="showAnalysisOverview">
-          <h2>Here will go the analysis</h2>
+          <h2>Analysis of your expenses</h2>
+          <app-pie></app-pie>
+          <button class="button" (click)="toggleWeeklyOverview()">
+            AI advices based on your expenses
+          </button>
+          <button class="button" (click)="toggleWeeklyOverview()">
+            Export analysis of expeses to excel
+          </button>
           <button class="button" (click)="toggleWeeklyOverview()">
             Back to Weekly Overview
           </button>
