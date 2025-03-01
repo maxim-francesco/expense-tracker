@@ -22,6 +22,7 @@ import {
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PieComponent } from '../../components/pie/pie.component';
 import { ExcelService } from '../../services/excel.service';
+import { GeminiService } from '../../services/gemini.service';
 
 @Component({
   selector: 'app-tracker',
@@ -111,8 +112,15 @@ export class TrackerComponent implements OnInit {
     private crudService: CrudService,
     private cdr: ChangeDetectorRef,
     private confirmDialogService: ConfirmDialogService,
-    private excelService: ExcelService
+    private excelService: ExcelService,
+    private geminiService: GeminiService
   ) {}
+
+  geminiTest() {
+    this.geminiService.sendMessage('salut!').subscribe((resp) => {
+      console.log(resp);
+    });
+  }
 
   exportToExcel(): void {
     this.excelService.generateExcel(this.data, 'user_data');

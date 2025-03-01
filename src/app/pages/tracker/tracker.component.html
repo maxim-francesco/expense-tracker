@@ -10,6 +10,7 @@
             : "Expense Tracker"
         }}
       </div>
+
       <div class="content">
         <ng-container
           *ngIf="
@@ -35,6 +36,11 @@
             <button class="button" (click)="toggleExpenseForm()">
               {{ showExpenseForm ? "Back" : "Add Expense" }}
             </button>
+
+            <button class="button" (click)="geminiTest()">
+              Upload Receipt
+            </button>
+
             <!-- <button class="button save-button" *ngIf="showExpenseForm" (click)="saveExpense(selectedDay)">Save</button> -->
             <button class="button save-button" (click)="toggleWeeklyOverview()">
               Weekly Overview
