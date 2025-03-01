@@ -74,6 +74,7 @@ export class TrackerComponent implements OnInit {
   showExpenseForm = false;
   showWeeklyOverview = false;
   showAnalysisOverview = false;
+  showAIExpertiseOverview = false;
   dailyExpenses: Expense[] = [];
 
   _expenses: Expense[] = [];
@@ -150,6 +151,11 @@ export class TrackerComponent implements OnInit {
     this.showAnalysisOverview = !this.showAnalysisOverview;
     this.showExpenseForm = false;
     this.showWeeklyOverview = false;
+  }
+
+  toggleAIExpertiseOverview() {
+    this.showAIExpertiseOverview = !this.showAIExpertiseOverview;
+    this.showAnalysisOverview = !this.showAnalysisOverview;
   }
 
   getCurrentDay(): DayOfWeek {

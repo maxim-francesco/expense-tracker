@@ -21,6 +21,7 @@ export class ExcelService {
       });
       worksheet.addRow(row);
     });
+
     // Save the workbook to a blob
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {

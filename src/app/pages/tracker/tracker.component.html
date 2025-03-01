@@ -11,7 +11,13 @@
         }}
       </div>
       <div class="content">
-        <ng-container *ngIf="!showWeeklyOverview">
+        <ng-container
+          *ngIf="
+            !showWeeklyOverview &&
+            !showAnalysisOverview &&
+            !showAIExpertiseOverview
+          "
+        >
           <!-- Tabs for weekdays -->
           <div class="tabs">
             <button
@@ -111,7 +117,13 @@
           </ng-container>
 
           <!-- Expense List -->
-          <ng-container *ngIf="!showExpenseForm && !showAnalysisOverview">
+          <ng-container
+            *ngIf="
+              !showExpenseForm &&
+              !showAnalysisOverview &&
+              !showAIExpertiseOverview
+            "
+          >
             <div class="expense-list">
               <h4>Existing Expenses</h4>
               <div class="expense-item" *ngFor="let _expense of dailyExpenses">
@@ -199,14 +211,35 @@
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
           <app-pie></app-pie>
-          <button class="button" (click)="toggleWeeklyOverview()">
+          <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
           <button class="button" (click)="exportToExcel()">
-            Export analysis of expeses to excel
+            Export your expeses to excel
           </button>
           <button class="button" (click)="toggleWeeklyOverview()">
             Back to Weekly Overview
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="showAIExpertiseOverview">
+          <h2>AI Expertise</h2>
+          <p>
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laborum
+            deleniti consequatur ut voluptatum sed accusamus, non officia sunt
+            at dolorem commodi velit fuga voluptatibus tempore minus facilis
+            ipsam distinctio sit! Aliquid maxime perspiciatis repudiandae sunt
+            quas blanditiis quam ab excepturi minus nihil? Magni molestiae
+            suscipit repellat quia non omnis! Excepturi dicta, magni quo
+            asperiores, sed impedit facilis incidunt natus provident dolorum,
+            quisquam sapiente sit ab. Accusamus reiciendis illum soluta, aut
+            tempora voluptatem a sapiente. Facere dolor dolorum, officiis
+            quibusdam nam ducimus sequi quidem eligendi minima quas magnam
+            pariatur ad deserunt doloremque, dolore eius modi! Inventore saepe
+            obcaecati tempore sed officia?
+          </p>
+          <button class="button" (click)="toggleAIExpertiseOverview()">
+            Back to Analysis
           </button>
         </ng-container>
       </div>
