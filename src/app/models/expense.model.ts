@@ -1,6 +1,6 @@
 export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
-export type Category = 'Groceries' | 'Taxes' | 'Entertainment' | 'Education' | 'Clothing' | 'Healthcare' | 'Sports' | 'Travel' | 'Gifts' | 'Miscellaneous' | string;
+//export type Category = 'Groceries' | 'Taxes' | 'Entertainment' | 'Education' | 'Clothing' | 'Healthcare' | 'Sports' | 'Travel' | 'Gifts' | 'Miscellaneous';
 
 export interface Expense {
   id: string;
@@ -23,4 +23,10 @@ export interface FirestoreExpenseDoc {
   amount: number;
   userId: string;
   timestamp: number;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  isDefault: boolean;
 }

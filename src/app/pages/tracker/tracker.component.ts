@@ -35,7 +35,7 @@ export class TrackerComponent implements OnInit {
 
   days: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   selectedDay: DayOfWeek = "Monday";
-  categories: Category[] = ['Groceries', 'Taxes', 'Entertainment', 'Education', 'Clothing', 'Healthcare', 'Sports', 'Travel', 'Gifts', 'Miscellaneous'];
+  categories: Category[] = [];
   newCategory = '';
   showCategoryPopup = false;
   showExpenseForm = false;
@@ -51,7 +51,7 @@ export class TrackerComponent implements OnInit {
 
   _newExpense: CreateExpenseDTO = {
     name: '',
-    category: 'Groceries',
+    category: { id: '', name: 'Groceries', isDefault: true },
     amount: 0,
     userId: '',
     timestamp: 0
@@ -60,7 +60,7 @@ export class TrackerComponent implements OnInit {
   _updates: UpdateExpenseDTO = {
     name: 'Updated Lunch',
     amount: 25,
-    category: 'Groceries'
+    category: { id: '', name: 'Groceries', isDefault: true }
   };
 
   expense: any[] = [];
@@ -79,6 +79,7 @@ export class TrackerComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit() {
+    this.loadCategories();
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
       this.days = config.weekdays.map(day => day.name);
       this.selectedDay = this.getCurrentAvailableDay();
@@ -90,6 +91,10 @@ export class TrackerComponent implements OnInit {
         this.currentUserId = user?.uid;
       }
     })
+  }
+
+  async loadCategories() {
+    this.categories = await this.crudService.getCategories();
   }
 
   toggleCategoryPopup() {
@@ -147,8 +152,14 @@ export class TrackerComponent implements OnInit {
   }
 
   async saveExpense(day: DayOfWeek) {
+    const selectedCategoryObj = this.categories.find(cat => cat.name === this.selectedCategory);
+    if (!selectedCategoryObj) {
+        console.error("Selected category not found");
+        return;
+    }
+
     this._newExpense.name = this.expenseName;
-    this._newExpense.category = this.selectedCategory as Category;
+    this._newExpense.category = selectedCategoryObj;
     this._newExpense.amount = this.expenseAmount!;
     this._newExpense.userId = this.currentUserId;
     this.showExpenseForm = false;
@@ -188,7 +199,7 @@ export class TrackerComponent implements OnInit {
 
     setTimeout(() => {
       this.expenseName = expense.name;
-      this.selectedCategory = expense.category;
+      this.selectedCategory = expense.category.name;
       this.expenseAmount = expense.amount;
     }, 0);
     this.isSaveDisabled = true;
@@ -199,9 +210,15 @@ export class TrackerComponent implements OnInit {
     if (!this.isEditing || !this.editingExpenseId)
       return;
 
+    const selectedCategoryObj = this.categories.find(cat => cat.name === this.selectedCategory);
+    if (!selectedCategoryObj) {
+        console.error("Selected category not found");
+        return;
+    }
+
     const updatedExpense: UpdateExpenseDTO = {
       name: this.expenseName,
-      category: this.selectedCategory as Category,
+      category: selectedCategoryObj,
       amount: this.expenseAmount!,
       timestamp: Date.now()
     };
@@ -248,40 +265,57 @@ export class TrackerComponent implements OnInit {
     return dayIndex > todayIndex;
   }
 
-  loadCategories(): void { }
-
-  addCategory(): void {
-    if (this.newCategory.trim() === '') {
-      return;
-    }
-
-    if (this.categories.includes(this.newCategory)) {
+  async addCategory() {
+    if (this.newCategory.trim() === '') return;
+    const existingCategory = this.categories.find(cat => cat.name.toLowerCase() === this.newCategory.toLowerCase());
+    if (existingCategory) {
       alert('Category already exists!');
       return;
     }
 
-    this.categories.push(this.newCategory);
+    const newCategoryId = await this.crudService.addCategory(this.newCategory);
+    if (newCategoryId) {
+      this.categories.push({ id: newCategoryId, name: this.newCategory, isDefault: false });
+    }
     this.newCategory = '';
     this.showCategoryPopup = false;
   }
 
-  editCategory(category: string): void {
-    this.editingCategory = category;
-    this.editedCategory = category;
+  editCategory(category: Category) {
+    if (category.isDefault) {
+      alert("You cannot edit default categories!");
+      return;
+    }
+    this.editingCategory = category.id;
+    this.editedCategory = category.name;
   }
 
-  saveEditedCategory(): void {
+
+  async saveEditedCategory() {
     if (!this.editedCategory.trim()) return;
-    const index = this.categories.indexOf(this.editingCategory!);
-    if (index !== -1) {
-      this.categories[index] = this.editedCategory;
+    const categoryToUpdate = this.categories.find(cat => cat.id === this.editingCategory);
+    if (categoryToUpdate && !categoryToUpdate.isDefault) {
+      const success = await this.crudService.updateCategory(categoryToUpdate.id, this.editedCategory, categoryToUpdate.isDefault);
+      if (success) {
+        categoryToUpdate.name = this.editedCategory;
+      }
     }
     this.editingCategory = null;
   }
 
-  deleteCategory(category: string) {
-    this.categories = this.categories.filter(cat => cat !== category);
+
+  async deleteCategory(category: { id: string, isDefault: boolean }) {
+    if (category.isDefault) {
+      alert("You cannot delete default categories!");
+      return;
+    }
+    const success = await this.crudService.deleteCategory(category.id, category.isDefault);
+    if (success) {
+      this.categories = this.categories.filter(cat => cat.id !== category.id);
+    }
   }
+
+
   validateAmount(event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = input.value;

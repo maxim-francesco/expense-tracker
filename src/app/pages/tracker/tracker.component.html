@@ -49,7 +49,7 @@
                   " required>
                   <option value="" disabled selected>Select Category</option>
                   <option *ngFor="let category of categories" [value]="category">
-                    {{ category }}
+                    {{ category.name }}
                   </option>
                 </select>
               </div>
@@ -62,15 +62,15 @@
 
                   <ul class="category-list">
                     <li *ngFor="let category of categories">
-                      <span *ngIf="editingCategory !== category">{{ category }}</span>
-                      <input *ngIf="editingCategory === category" type="text" [(ngModel)]="editedCategory" />
+                      <span *ngIf="editingCategory !== category.id">{{ category.name }}</span>
+                      <input *ngIf="editingCategory === category.id" type="text" [(ngModel)]="editedCategory" />
 
                       <div class="category-buttons">
-                        <button class="edit-btn" *ngIf="editingCategory !== category"
+                        <button class="edit-btn" *ngIf="editingCategory !== category.id && !category.isDefault"
                           (click)="editCategory(category)">Edit</button>
-                        <button class="save-btn" *ngIf="editingCategory === category"
+                        <button class="save-btn" *ngIf="editingCategory === category.id"
                           (click)="saveEditedCategory()">Save</button>
-                        <button class="delete-btn" (click)="deleteCategory(category)">Delete</button>
+                        <button class="delete-btn" *ngIf="!category.isDefault" (click)="deleteCategory(category)">Delete</button>
                       </div>
                     </li>
                   </ul>
