@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TrackerConfigService, TrackerConfig } from '../../services/tracker-config.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -68,12 +68,15 @@ export class TrackerComponent implements OnInit {
   expendedDay: DayOfWeek | null = null;
   expendedDayExpenses: Expense[] = [];
 
+  editingCategory: string | null = null;
+  editedCategory: string = '';
+
   constructor(private trackerConfigService: TrackerConfigService,
-              private crudService: CrudService,
-              private cdr: ChangeDetectorRef,
-              private confirmDialogService: ConfirmDialogService,
-              private authService: AuthService,
-              private router: Router) { }
+    private crudService: CrudService,
+    private cdr: ChangeDetectorRef,
+    private confirmDialogService: ConfirmDialogService,
+    private authService: AuthService,
+    private router: Router) { }
 
   ngOnInit() {
     this.trackerConfigService.getWeekdays().subscribe((config: TrackerConfig) => {
@@ -135,9 +138,9 @@ export class TrackerComponent implements OnInit {
 
   validateFormAtSave() {
     this.isSaveDisabled = !this.selectedCategory ||
-                          !this.expenseName ||
-                          !this.expenseAmount ||
-                          this.expenseAmount <= 0;
+      !this.expenseName ||
+      !this.expenseAmount ||
+      this.expenseAmount <= 0;
   }
   validateFormAtUpdate() {
     this.isSaveDisabled = false;
@@ -247,10 +250,38 @@ export class TrackerComponent implements OnInit {
 
   loadCategories(): void { }
 
-  addCategory(): void { }
+  addCategory(): void {
+    if (this.newCategory.trim() === '') {
+      return;
+    }
 
-  deleteCategory(category: string): void { }
+    if (this.categories.includes(this.newCategory)) {
+      alert('Category already exists!');
+      return;
+    }
 
+    this.categories.push(this.newCategory);
+    this.newCategory = '';
+    this.showCategoryPopup = false;
+  }
+
+  editCategory(category: string): void {
+    this.editingCategory = category;
+    this.editedCategory = category;
+  }
+
+  saveEditedCategory(): void {
+    if (!this.editedCategory.trim()) return;
+    const index = this.categories.indexOf(this.editingCategory!);
+    if (index !== -1) {
+      this.categories[index] = this.editedCategory;
+    }
+    this.editingCategory = null;
+  }
+
+  deleteCategory(category: string) {
+    this.categories = this.categories.filter(cat => cat !== category);
+  }
   validateAmount(event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = input.value;
