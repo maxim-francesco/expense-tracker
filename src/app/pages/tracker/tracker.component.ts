@@ -25,6 +25,8 @@ import { ExcelService } from '../../services/excel.service';
 import { GeminiService } from '../../services/gemini.service';
 import { OcrService } from '../../services/ocr.service';
 import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
+import { ExpensesCrudService } from '../../services/expenses-crud.service';
+import { Expense2 } from '../../services/expenses-crud.service';
 
 @Component({
   selector: 'app-tracker',
@@ -116,8 +118,24 @@ export class TrackerComponent implements OnInit {
     private confirmDialogService: ConfirmDialogService,
     private excelService: ExcelService,
     private ocrService: OcrService,
-    private geminiService: GeminiService
+    private geminiService: GeminiService,
+    private expensesCrudService: ExpensesCrudService
   ) {}
+
+  addExpense(): void {
+    console.log('aici');
+
+    const newExpense: Expense2 = {
+      name: 'Item1',
+      amount: 100,
+      date: new Date().toISOString(),
+      category: 'Food',
+      userId: '-1',
+    };
+    this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
+      console.log(response);
+    });
+  }
 
   //extracting text
   imageUrl: string | ArrayBuffer | null = null;
