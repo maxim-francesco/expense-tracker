@@ -24,11 +24,12 @@ import { PieComponent } from '../../components/pie/pie.component';
 import { ExcelService } from '../../services/excel.service';
 import { GeminiService } from '../../services/gemini.service';
 import { OcrService } from '../../services/ocr.service';
+import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
 
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, PieComponent],
+  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })
