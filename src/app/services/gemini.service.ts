@@ -18,21 +18,35 @@ export class GeminiService {
           parts: [
             {
               text: `Extrage toate produsele și prețurile din acest bon de cumpărături:\n\n${ocrText}\n\n
-              Identifică și categoria fiecărui produs pe baza numelui. 
-  
-              ✅ Răspunde STRICT în format JSON valid, fără text suplimentar. Structura trebuie să fie:
-              [
-                { "name": "Numele produsului", "price": 12.99, "category": "Categorie" }
-              ]
-  
-              🔹 Exemple de categorii posibile: 
-              - "Alimente" (Carne, Lactate, Fructe, Legume, Pâine)
-              - "Băuturi" (Apă, Suc, Cafea, Bere, Vin)
-              - "Produse de curățenie" (Detergent, Șervețele)
-              - "Electrocasnice" (Baterii, Cabluri, Becuri)
-              - "Diverse" (Sacoșe, Pungi, Articole neclasificate)
-  
-              ⚠️ ATENȚIE: Răspunde DOAR cu JSON valid, fără niciun alt caracter în plus. Nu include ghilimele externe.`,
+                      Identifică și categoria fiecărui produs pe baza numelui.
+
+                      ✅ Răspunde STRICT cu un array JSON valid, fără text suplimentar. Fiecare element trebuie să respecte structura:
+                      [
+                          {
+                              "name": "Numele produsului",
+                              "amount": 12.99,
+                              "category": "Categorie"
+                          }
+                      ]
+
+                      🔒 Categoria trebuie să fie EXACT una dintre următoarele valori (care corespund tipului Category din aplicația mea):
+
+                      'Groceries' | 'Taxes' | 'Entertainment' | 'Education' | 'Clothing' | 'Healthcare' | 'Sports' | 'Travel' | 'Gifts' | 'Miscellaneous'
+
+                      ❗ Nu inventa alte categorii. Dacă un produs nu se potrivește clar, pune categoria "Miscellaneous".
+
+                      ⚠️ ATENȚIE:
+                      - Nu include delimitatori de tip bloc de cod (fără \`\`\`json sau altceva).
+                      - Nu include explicații sau comentarii.
+                      - Returnează DOAR array-ul JSON conform structurii Expense.
+                      - Respectă exact categoriile din listă.
+
+                      ✅ Exemplu valid:
+                      [
+                          { "name": "BERE DZ.6*0.5L CIUCA", "price": 15.00, "category": "Băuturi" },
+                          { "name": "CARTOFI ALBI VRAC RO", "price": 4.45, "category": "Alimente" }
+                      ]
+                      `,
             },
           ],
         },

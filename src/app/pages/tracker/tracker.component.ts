@@ -23,6 +23,7 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PieComponent } from '../../components/pie/pie.component';
 import { ExcelService } from '../../services/excel.service';
 import { GeminiService } from '../../services/gemini.service';
+import { OcrService } from '../../services/ocr.service';
 
 @Component({
   selector: 'app-tracker',
@@ -100,7 +101,7 @@ export class TrackerComponent implements OnInit {
   expendedDay: DayOfWeek | null = null;
   expendedDayExpenses: Expense[] = [];
 
-  // dummy data
+  // dummy data for excel
   data = [
     { Name: 'John Doe', Age: 30, City: 'New York' },
     { Name: 'Jane Smith', Age: 25, City: 'San Francisco' },
@@ -113,12 +114,72 @@ export class TrackerComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private confirmDialogService: ConfirmDialogService,
     private excelService: ExcelService,
+    private ocrService: OcrService,
     private geminiService: GeminiService
   ) {}
 
-  geminiTest() {
-    this.geminiService.sendMessage('salut!').subscribe((resp) => {
-      console.log(resp);
+  //extracting text
+  imageUrl: string | ArrayBuffer | null = null;
+  extractedText: string = '';
+  extractedExpenses: Expense[] = [];
+  selectedFile: File | null = null;
+
+  onFileSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      this.selectedFile = target.files[0];
+
+      const reader = new FileReader();
+      reader.onload = (e) => (this.imageUrl = e.target!.result);
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  processImage(): void {
+    if (!this.selectedFile) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64Image = (reader.result as string).split(',')[1];
+      this.ocrService.extractText(base64Image).subscribe((response) => {
+        if (response.responses && response.responses.length > 0) {
+          this.extractedText =
+            response.responses[0].fullTextAnnotation?.text || '';
+          this.sendToGemini(this.extractedText);
+        }
+      });
+    };
+    reader.readAsDataURL(this.selectedFile);
+  }
+
+  sendToGemini(ocrText: string) {
+    this.geminiService.extractExpenses(ocrText).subscribe(async (response) => {
+      try {
+        const rawText = response.candidates[0].content.parts[0].text;
+
+        // Curățăm delimitatorii de bloc de cod
+        const cleanedText = rawText
+          .replace(/^```json\s*/, '')
+          .replace(/```$/, '');
+
+        // Parsăm JSON-ul curățat
+        this.extractedExpenses = JSON.parse(cleanedText);
+        console.log(this.extractedExpenses);
+
+        this.addExpensesFromExtractedText(this.extractedExpenses);
+        await this.getDailyTotal();
+        // this.ngOnInit();
+        this.getExpensesByDay(this.selectedDay);
+      } catch (error) {
+        console.error('Eroare la parsarea răspunsului Gemini:', error);
+        this.extractedExpenses = []; // Evităm afișarea de date corupte în UI
+      }
+    });
+  }
+
+  addExpensesFromExtractedText(expenses: Expense[]) {
+    expenses.forEach((expense) => {
+      this.crudService.addItem(this.selectedDay, expense);
     });
   }
 

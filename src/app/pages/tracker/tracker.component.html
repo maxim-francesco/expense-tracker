@@ -46,11 +46,14 @@
           <div class="upload-receipt">
             <input
               placeholder="Upload Receipt"
+              (change)="onFileSelected($event)"
               class="button"
               type="file"
               accept="image/*"
             />
-            <button class="button">Extract Expenses</button>
+            <button class="button" (click)="processImage()">
+              Extract Expenses
+            </button>
           </div>
 
           <!-- Expense Form -->
