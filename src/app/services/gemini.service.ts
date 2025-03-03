@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { firebaseConfig } from '../../environment';
+import { Expense2 } from './expenses-crud.service';
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +72,43 @@ export class GeminiService {
     };
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<any>(this.apiUrl, requestBody, { headers });
+  }
+
+  analyzeWeeklyExpenses(expenses: Expense2[]): Observable<any> {
+    const expensesText = expenses
+      .map(
+        (exp) =>
+          `${exp.date} - ${exp.category} - ${exp.name}: ${exp.amount} RON`
+      )
+      .join('\n');
+
+    const prompt = `
+Am următoarele cheltuieli înregistrate pentru săptămâna aceasta:
+
+${expensesText}
+
+✅ Te rog să-mi faci o analiză financiară scurtă și la obiect, fără formatare fancy, fără bold, fără steluțe. Scrie doar text simplu, clar și util.
+✅ Vreau să îmi spui:
+
+1. Care sunt categoriile principale unde am cheltuit cel mai mult?
+2. Observații importante - vezi ceva riscant sau problematic în aceste cheltuieli?
+3. Sfaturi pentru gestionarea mai bună a banilor (maxim 3 sfaturi, nu foarte lungi).
+4. Un scor financiar săptămânal pe o scară de la 1 la 10.
+
+❗ Răspunde direct, doar cu text simplu. Evită orice introduceri, concluzii lungi sau urări de final.
+`;
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+    };
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
     return this.http.post<any>(this.apiUrl, requestBody, { headers });
   }
 }

@@ -149,6 +149,25 @@ export class TrackerComponent implements OnInit {
 
   //------------------------------------------------------------------
 
+  //AI Analysis
+
+  weeklyAnalysis: string = '';
+
+  sendWeeklyExpensesToGemini(): void {
+    const allExpenses = this.weeklySpending.flatMap((day) => day.expenses);
+
+    this.geminiService
+      .analyzeWeeklyExpenses(allExpenses)
+      .subscribe((response) => {
+        const analysis = response.candidates[0]?.content?.parts[0]?.text;
+        console.log('Gemini Analysis:', analysis);
+
+        this.weeklyAnalysis = analysis;
+      });
+  }
+
+  //------------------------------------------------------------------
+
   //UI Expenses--------------------------------------------------------
 
   categories: Category[] = [
@@ -536,6 +555,7 @@ export class TrackerComponent implements OnInit {
   toggleAIExpertiseOverview() {
     this.showAIExpertiseOverview = !this.showAIExpertiseOverview;
     this.showAnalysisOverview = !this.showAnalysisOverview;
+    this.sendWeeklyExpensesToGemini();
   }
 
   async toggleDayExpenses(day: { date: string; dayName: string }) {
