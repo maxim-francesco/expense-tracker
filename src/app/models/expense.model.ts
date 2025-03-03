@@ -1,6 +1,23 @@
-export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+export type DayOfWeek =
+  | 'Monday'
+  | 'Tuesday'
+  | 'Wednesday'
+  | 'Thursday'
+  | 'Friday'
+  | 'Saturday'
+  | 'Sunday';
 
-export type Category = 'Groceries' | 'Taxes' | 'Entertainment' | 'Education' | 'Clothing' | 'Healthcare' | 'Sports' | 'Travel' | 'Gifts' | 'Miscellaneous';
+export type Category =
+  | 'Groceries'
+  | 'Taxes'
+  | 'Entertainment'
+  | 'Education'
+  | 'Clothing'
+  | 'Healthcare'
+  | 'Sports'
+  | 'Travel'
+  | 'Gifts'
+  | 'Miscellaneous';
 
 export interface Expense {
   id: string;

@@ -22,6 +22,10 @@ export class AuthService {
     this.autoLogin();
   }
 
+  getId() {
+    return this.user.getValue()?.id;
+  }
+
   signup(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(

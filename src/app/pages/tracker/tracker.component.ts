@@ -27,6 +27,13 @@ import { OcrService } from '../../services/ocr.service';
 import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
 import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
+import { AuthService } from '../../services/auth.service';
+
+interface DaySpending {
+  date: string;
+  dayName: string;
+  total: number;
+}
 
 @Component({
   selector: 'app-tracker',
@@ -36,82 +43,9 @@ import { Expense2 } from '../../services/expenses-crud.service';
   styleUrls: ['./tracker.component.css'],
 })
 export class TrackerComponent implements OnInit {
-  errorMessage: string = '';
-  selectedCategory: string = '';
-  isSaveDisabled: boolean = true;
-  expenseName: string = '';
-  expenseAmount: number | null = null;
-
-  dailyTotals: { [key in DayOfWeek]: number } = {
-    Monday: 0,
-    Tuesday: 0,
-    Wednesday: 0,
-    Thursday: 0,
-    Friday: 0,
-    Saturday: 0,
-    Sunday: 0,
-  };
-
-  days: DayOfWeek[] = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-  selectedDay: DayOfWeek = 'Monday';
-  categories: Category[] = [
-    'Groceries',
-    'Taxes',
-    'Entertainment',
-    'Education',
-    'Clothing',
-    'Healthcare',
-    'Sports',
-    'Travel',
-    'Gifts',
-    'Miscellaneous',
-  ];
-  newCategory = '';
-  showCategoryPopup = false;
-  showExpenseForm = false;
-  showWeeklyOverview = false;
-  showAnalysisOverview = false;
-  showAIExpertiseOverview = false;
-  dailyExpenses: Expense[] = [];
-
-  _expenses: Expense[] = [];
-
-  isEditing = false;
-  editingExpenseId: string | null = null;
-
-  _newExpense: CreateExpenseDTO = {
-    name: '',
-    category: 'Groceries',
-    amount: 0,
-  };
-
-  _updates: UpdateExpenseDTO = {
-    name: 'Updated Lunch',
-    amount: 25,
-    category: 'Groceries',
-  };
-
-  expense: any[] = [];
-
-  expendedDay: DayOfWeek | null = null;
-  expendedDayExpenses: Expense[] = [];
-
-  // dummy data for excel
-  data = [
-    { Name: 'John Doe', Age: 30, City: 'New York' },
-    { Name: 'Jane Smith', Age: 25, City: 'San Francisco' },
-    // Add more data as needed
-  ];
-
+  //Services---------------------------------------------------------
   constructor(
+    private authService: AuthService,
     private trackerConfigService: TrackerConfigService,
     private crudService: CrudService,
     private cdr: ChangeDetectorRef,
@@ -122,22 +56,30 @@ export class TrackerComponent implements OnInit {
     private expensesCrudService: ExpensesCrudService
   ) {}
 
-  addExpense(): void {
-    console.log('aici');
-
-    const newExpense: Expense2 = {
-      name: 'Item1',
-      amount: 100,
-      date: new Date().toISOString(),
-      category: 'Food',
-      userId: '-1',
-    };
-    this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
-      console.log(response);
-    });
+  ngOnInit() {
+    this.loadTodayExpenses();
+    this.loadWeekDays();
+    this.loadExpensesForWeek(this.week);
   }
 
-  //extracting text
+  //------------------------------------------------------------------
+
+  //Excel-------------------------------------------------------------
+
+  data = [
+    { Name: 'John Doe', Age: 30, City: 'New York' },
+    { Name: 'Jane Smith', Age: 25, City: 'San Francisco' },
+    // Add more data as needed
+  ];
+
+  exportToExcel(): void {
+    this.excelService.generateExcel(this.data, 'user_data');
+  }
+
+  //------------------------------------------------------------------
+
+  //Extracting from photo----------------------------------------------------------
+
   imageUrl: string | ArrayBuffer | null = null;
   extractedText: string = '';
   extractedExpenses: Expense[] = [];
@@ -186,9 +128,7 @@ export class TrackerComponent implements OnInit {
         console.log(this.extractedExpenses);
 
         this.addExpensesFromExtractedText(this.extractedExpenses);
-        await this.getDailyTotal();
-        // this.ngOnInit();
-        this.getExpensesByDay(this.selectedDay);
+        // this.getExpensesByDay(this.selectedDay);
       } catch (error) {
         console.error('Eroare la parsarea răspunsului Gemini:', error);
         this.extractedExpenses = []; // Evităm afișarea de date corupte în UI
@@ -198,28 +138,301 @@ export class TrackerComponent implements OnInit {
 
   addExpensesFromExtractedText(expenses: Expense[]) {
     expenses.forEach((expense) => {
-      this.crudService.addItem(this.selectedDay, expense);
+      // this.crudService.addItem(this.selectedDay, expense);
     });
   }
 
-  exportToExcel(): void {
-    this.excelService.generateExcel(this.data, 'user_data');
+  //------------------------------------------------------------------
+
+  //UI Expenses--------------------------------------------------------
+
+  categories: Category[] = [
+    'Groceries',
+    'Taxes',
+    'Entertainment',
+    'Education',
+    'Clothing',
+    'Healthcare',
+    'Sports',
+    'Travel',
+    'Gifts',
+    'Miscellaneous',
+  ];
+
+  days: DayOfWeek[] = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  selectedDay: { date: string; dayName: string } | undefined = undefined;
+
+  week: { date: string; dayName: string }[] = [];
+
+  // 1️⃣ Funcție existentă: intervalul complet al săptămânii pe baza unei date
+  getWeekInterval(dateString: string): { startDate: Date; endDate: Date } {
+    const date = new Date(dateString);
+
+    const dayOfWeek = date.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // dacă e duminică, ne întoarcem 6 zile
+    const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek; // până la final de săptămână
+
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - daysToMonday);
+
+    const sunday = new Date(date);
+    sunday.setDate(date.getDate() + daysToSunday);
+
+    return { startDate: monday, endDate: sunday };
   }
 
-  ngOnInit() {
-    this.trackerConfigService
-      .getWeekdays()
-      .subscribe((config: TrackerConfig) => {
-        this.days = config.weekdays.map((day) => day.name);
-        this.selectedDay = this.getCurrentAvailableDay();
-        this.getExpensesByDay(this.selectedDay);
-      });
-    this.getDailyTotal();
+  // 2️⃣ Funcție nouă: vector cu 7 zile - nume + dată (Luni-Duminică)
+  getCurrentWeekWithDays(): { date: string; dayName: string }[] {
+    const today = new Date();
+
+    // Aflăm care e prima zi din săptămână (Luni)
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    if (dayOfWeek === 0) {
+      // dacă azi e duminică, ne întoarcem 6 zile înapoi
+      monday.setDate(today.getDate() - 6);
+    } else {
+      // altfel, ne întoarcem cu (dayOfWeek - 1)
+      monday.setDate(today.getDate() - (dayOfWeek - 1));
+    }
+
+    // Construim array-ul cu 7 zile (Luni -> Duminică)
+    const week: { date: string; dayName: string }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(monday);
+      currentDate.setDate(monday.getDate() + i);
+
+      const dateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+      const dayName = this.getDayOfWeek(dateStr);
+
+      week.push({ date: dateStr, dayName });
+    }
+
+    return week;
   }
+
+  // Helper: ziua săptămânii pentru o dată dată (folosită și în ambele metode)
+  private getDayOfWeek(dateString: string): string {
+    const daysOfWeek = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+
+    const date = new Date(dateString);
+    return daysOfWeek[date.getDay()];
+  }
+
+  isDateInFutureOrPast(dateString: string): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // curățăm ora ca să comparăm doar datele calendaristice
+
+    const inputDate = new Date(dateString);
+    inputDate.setHours(0, 0, 0, 0); // și input-ul curățat de oră
+
+    return inputDate > today; // true = viitor, false = trecut sau azi
+  }
+
+  findDayByDate(date: string): { date: string; dayName: string } | undefined {
+    return this.week.find((day) => day.date === date);
+  }
+
+  loadWeekDays() {
+    this.week = this.getCurrentWeekWithDays();
+    this.selectedDay = this.findDayByDate(
+      new Date().toISOString().split('T')[0]
+    );
+  }
+
+  //------------------------------------------------------------------
+
+  //CRUD EXPENSES------------------------------------------------------
+
+  expenses2: Expense2[] = [];
+
+  //CREATE
+
+  private createNewItem() {
+    const newExpense: Expense2 = {
+      name: this.expenseName,
+      amount: this.expenseAmount!,
+      date: this.selectedDay!.date,
+      category: this.selectedCategory,
+      userId: this.authService.getId()!,
+    };
+    return newExpense;
+  }
+
+  private resetSavingForm() {
+    this.resetForm();
+    this.showExpenseForm = false;
+  }
+
+  addExpense(): void {
+    const newExpense = this.createNewItem();
+    this.resetSavingForm();
+    this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
+      this.loadExpensesForUserOnDate(this.selectedDay!.date);
+    });
+  }
+
+  //READ
+
+  loadTodayExpenses() {
+    this.loadExpensesForUserOnDate(new Date().toISOString().split('T')[0]);
+  }
+
+  loadExpenses(): void {
+    this.expensesCrudService
+      .getExpensesForUser(this.authService.getId()!)
+      .subscribe((expenses) => {
+        this.expenses2 = expenses;
+      });
+  }
+
+  loadExpensesForUserOnDate(date: string) {
+    console.log(date);
+
+    this.expensesCrudService
+      .loadExpensesForUserOnDate(this.authService.getId()!, date)
+      .subscribe((expenses) => {
+        console.log(expenses);
+
+        this.expenses2 = expenses;
+      });
+  }
+
+  weeklySpending: DaySpending[] = [];
+
+  loadExpensesForWeek(week: { date: string; dayName: string }[]): void {
+    this.expensesCrudService
+      .getExpensesForUser(this.authService.getId()!)
+      .subscribe((expenses) => {
+        const weeklySpending = week.map((day) => {
+          const expensesForDay = expenses.filter(
+            (exp) => exp.date === day.date
+          );
+          const total = expensesForDay.reduce(
+            (sum, exp) => sum + exp.amount,
+            0
+          );
+
+          return {
+            date: day.date,
+            dayName: day.dayName,
+            total,
+          };
+        });
+
+        console.log('Spending for provided week:', weeklySpending);
+
+        // Dacă vrei să salvezi într-un state din component:
+        this.weeklySpending = weeklySpending;
+      });
+  }
+
+  //UPDATE
+
+  private updateModeForm(expense: Expense2) {
+    if (!expense) return;
+
+    this.isEditing = true;
+    this.showExpenseForm = true;
+    this.isSaveDisabled = true;
+  }
+
+  private showDataForUpdateMode(expense: Expense2) {
+    this.expenseName = expense.name;
+    this.selectedCategory = expense.category;
+    this.expenseAmount = expense.amount;
+    this.editingExpenseId = expense.id!;
+  }
+
+  turnOnUpdateMode(expense: Expense2) {
+    this.updateModeForm(expense);
+    this.showDataForUpdateMode(expense);
+  }
+
+  private updatedItem() {
+    const updatedItem = this.createNewItem();
+    updatedItem.id = this.editingExpenseId!;
+    return updatedItem;
+  }
+
+  updateExpense2(): void {
+    const updatedExpense = this.updatedItem();
+    this.resetSavingForm();
+    this.expensesCrudService.updateExpense(updatedExpense).subscribe(() => {
+      this.loadExpensesForUserOnDate(this.selectedDay!.date);
+    });
+  }
+
+  //DELETE
+
+  private verifyDeletion() {
+    return this.confirmDialogService.confirm({
+      message: 'Are you sure you want to delete this expense?',
+    });
+  }
+
+  private delete(expense: Expense2) {
+    if (expense.id) {
+      this.expensesCrudService.deleteExpense(expense.id).subscribe(() => {
+        this.loadExpensesForUserOnDate(this.selectedDay!.date);
+      });
+    }
+  }
+
+  deleteExpense2(expense: Expense2): void {
+    this.verifyDeletion().subscribe(() => {
+      this.delete(expense);
+    });
+  }
+
+  //--------------------------------------------------------------------
+
+  errorMessage: string = '';
+  selectedCategory: string = '';
+  isSaveDisabled: boolean = true;
+  expenseName: string = '';
+  expenseAmount: number | null = null;
+
+  dailyTotals: { [key in DayOfWeek]: number } = {
+    Monday: 0,
+    Tuesday: 0,
+    Wednesday: 0,
+    Thursday: 0,
+    Friday: 0,
+    Saturday: 0,
+    Sunday: 0,
+  };
+
+  showCategoryPopup = false;
+  showExpenseForm = false;
+  showWeeklyOverview = false;
+  showAnalysisOverview = false;
+  showAIExpertiseOverview = false;
+  isEditing = false;
+  editingExpenseId: string | null = null;
+
+  expendedDay: { date: string; dayName: string } | null = null;
+  expendedDayExpenses: Expense2[] = [];
 
   toggleCategoryPopup() {
     this.showCategoryPopup = !this.showCategoryPopup;
-    this.newCategory = '';
   }
 
   toggleExpenseForm() {
@@ -233,6 +446,7 @@ export class TrackerComponent implements OnInit {
     this.showWeeklyOverview = !this.showWeeklyOverview;
     this.showExpenseForm = false;
     this.showAnalysisOverview = false;
+    this.loadExpensesForWeek(this.week);
   }
 
   toggleAnalysisOverview() {
@@ -246,162 +460,41 @@ export class TrackerComponent implements OnInit {
     this.showAnalysisOverview = !this.showAnalysisOverview;
   }
 
-  getCurrentDay(): DayOfWeek {
-    const today = new Date();
-    const weekdays = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ];
-    return weekdays[today.getDay()] as DayOfWeek;
-  }
+  // getCurrentDay(): DayOfWeek {
+  //   const today = new Date();
+  //   const weekdays = [
+  //     'Sunday',
+  //     'Monday',
+  //     'Tuesday',
+  //     'Wednesday',
+  //     'Thursday',
+  //     'Friday',
+  //     'Saturday',
+  //   ];
+  //   return weekdays[today.getDay()] as DayOfWeek;
+  // }
 
-  getCurrentAvailableDay(): DayOfWeek {
-    const currentDay = this.getCurrentDay() as DayOfWeek;
-    return this.days.includes(currentDay)
-      ? currentDay
-      : (this.days[0] as DayOfWeek);
-  }
-
-  expenses = [
-    { name: 'Lunch', category: 'Food', amount: 20, day: 'Monday' },
-    { name: 'Taxi', category: 'Transport', amount: 15, day: 'Monday' },
-    { name: 'Groceries', category: 'Shopping', amount: 30, day: 'Tuesday' },
-    { name: 'Coffee', category: 'Food', amount: 5, day: 'Wednesday' },
-    { name: 'Gym', category: 'Health', amount: 40, day: 'Thursday' },
-  ];
-
-  getDayExpenses(day: DayOfWeek) {
-    return this.expenses.filter((expense) => expense.day === day);
-  }
+  // getCurrentAvailableDay(): DayOfWeek {
+  //   const currentDay = this.getCurrentDay() as DayOfWeek;
+  //   return this.days.includes(currentDay)
+  //     ? currentDay
+  //     : (this.days[0] as DayOfWeek);
+  // }
 
   async getExpensesByDay(day: DayOfWeek) {
-    this.dailyExpenses = await this.crudService.getByDay(day);
-  }
-
-  validateFormAtSave() {
-    this.isSaveDisabled =
-      !this.selectedCategory ||
-      !this.expenseName ||
-      !this.expenseAmount ||
-      this.expenseAmount <= 0;
-  }
-  validateFormAtUpdate() {
-    this.isSaveDisabled = false;
-  }
-
-  async saveExpense(day: DayOfWeek) {
-    this._newExpense.name = this.expenseName;
-    console.log(this.expenseName);
-    this._newExpense.category = this.selectedCategory as Category;
-    this._newExpense.amount = this.expenseAmount!;
-    this.showExpenseForm = false;
-    this.resetForm();
-    await this.crudService.addItem(day, this._newExpense);
-    await this.getDailyTotal();
-    // this.ngOnInit();
-    this.getExpensesByDay(this.selectedDay);
-    // this.resetForm();
-  }
-
-  async deleteExpense(id: string) {
-    // const confirmation = confirm(`Are you sure you want to delete?`);
-    // if (confirmation) {
-    //   await this.crudService.deleteItem(this.selectedDay, id);
-    //   this.getExpensesByDay(this.selectedDay);
-    // }
-    this.confirmDialogService
-      .confirm({
-        message: 'Are you sure you want to delete this expense?',
-      })
-      .subscribe(async (confirmed) => {
-        if (confirmed) {
-          await this.crudService.deleteItem(this.selectedDay, id);
-          await this.getDailyTotal();
-          this.getExpensesByDay(this.selectedDay);
-        }
-      });
-  }
-
-  resetForm() {
-    this.expenseName = '';
-    this.selectedCategory = '';
-    this.expenseAmount = null;
-    this.isEditing = false;
-    this.editingExpenseId = null;
-  }
-
-  editExpense(expense: Expense) {
-    if (!expense) return;
-
-    this.isEditing = true;
-    this.editingExpenseId = expense.id;
-
-    this.showExpenseForm = true;
-
-    setTimeout(() => {
-      this.expenseName = expense.name;
-      this.selectedCategory = expense.category;
-      this.expenseAmount = expense.amount;
-    }, 0);
-    this.isSaveDisabled = true;
-  }
-
-  async updateExpense() {
-    if (!this.isEditing || !this.editingExpenseId) return;
-
-    const updatedExpense: UpdateExpenseDTO = {
-      name: this.expenseName,
-      category: this.selectedCategory as Category,
-      amount: this.expenseAmount!,
-    };
-
-    // console.log("Updated values are: Name: ", updatedExpense.name, " Amount: ", updatedExpense.amount, " Category: ", updatedExpense.category)
-
-    await this.crudService.updateItem(
-      this.selectedDay,
-      this.editingExpenseId,
-      updatedExpense
-    );
-    await this.getDailyTotal();
-
-    this.isEditing = false;
-    this.editingExpenseId = null;
-    this.toggleExpenseForm();
-    this.getExpensesByDay(this.selectedDay);
-  }
-
-  async getDailyTotal() {
-    try {
-      this.dailyTotals = await this.crudService.calculateDailyTotals();
-    } catch (error) {
-      console.error('Error loading daily totals:', error);
-    }
+    // this.dailyExpenses = await this.crudService.getByDay(day);
   }
 
   getWeeklyTotal() {
-    return Object.values(this.dailyTotals).reduce(
-      (totalSum, dailyAmount) => totalSum + dailyAmount,
-      0
-    );
+    // return Object.values(this.dailyTotals).reduce(
+    //   (totalSum, dailyAmount) => totalSum + dailyAmount,
+    //   0
+    // );
   }
 
   onDayChanged(day: DayOfWeek) {
-    this.selectedDay = day;
+    // this.selectedDay = day;
     this.ngOnInit();
-  }
-
-  checkDay(): boolean {
-    const today = new Date();
-    // return this.selectedDay > this.days[today.getDay() - 1];
-    return (
-      this.days.indexOf(this.selectedDay) >
-      this.days.indexOf(this.days[today.getDay() - 1])
-    );
   }
 
   isFutureDay(day: DayOfWeek): boolean {
@@ -415,36 +508,24 @@ export class TrackerComponent implements OnInit {
     return dayIndex > todayIndex;
   }
 
-  loadCategories(): void {}
-
-  addCategory(): void {}
-
-  deleteCategory(category: string): void {}
-
-  validateAmount(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-
-    this.errorMessage = '';
-
-    if (!value) {
-      return;
-    }
-
-    const numValue = parseFloat(value);
-
-    if (numValue <= 0) {
-      this.errorMessage = 'Amount must be greater than 0';
-      return;
-    }
-
-    if (value.includes('.')) {
-      const parts = value.split('.');
-      if (parts[1] && parts[1].length > 2) {
-        input.value = numValue.toFixed(2);
-      }
+  async toggleDayExpenses(day: { date: string; dayName: string }) {
+    if (this.expendedDay === day) {
+      this.expendedDay = null;
+      this.expendedDayExpenses = [];
+    } else {
+      this.expendedDay = day;
+      // this.expendedDayExpenses = await this.crudService.getByDay(day);
+      this.expensesCrudService
+        .loadExpensesForUserOnDate(this.authService.getId()!, day.date)
+        .subscribe((expenses) => {
+          this.expendedDayExpenses = expenses;
+        });
+      this.cdr.detectChanges();
     }
   }
+
+  //////////////
+
   onKeyPress(event: KeyboardEvent): boolean {
     const charCode = event.which || event.keyCode;
     const inputValue = (event.target as HTMLInputElement).value;
@@ -470,14 +551,47 @@ export class TrackerComponent implements OnInit {
     return false;
   }
 
-  async toggleDayExpenses(day: DayOfWeek) {
-    if (this.expendedDay === day) {
-      this.expendedDay = null;
-      this.expendedDayExpenses = [];
-    } else {
-      this.expendedDay = day;
-      this.expendedDayExpenses = await this.crudService.getByDay(day);
-      this.cdr.detectChanges();
+  validateAmount(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+
+    this.errorMessage = '';
+
+    if (!value) {
+      return;
     }
+
+    const numValue = parseFloat(value);
+
+    if (numValue <= 0) {
+      this.errorMessage = 'Amount must be greater than 0';
+      return;
+    }
+
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1] && parts[1].length > 2) {
+        input.value = numValue.toFixed(2);
+      }
+    }
+  }
+
+  validateFormAtSave() {
+    this.isSaveDisabled =
+      !this.selectedCategory ||
+      !this.expenseName ||
+      !this.expenseAmount ||
+      this.expenseAmount <= 0;
+  }
+  validateFormAtUpdate() {
+    this.isSaveDisabled = false;
+  }
+
+  resetForm() {
+    this.expenseName = '';
+    this.selectedCategory = '';
+    this.expenseAmount = null;
+    this.isEditing = false;
+    this.editingExpenseId = null;
   }
 }

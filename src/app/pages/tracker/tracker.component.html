@@ -22,13 +22,15 @@
           <!-- Tabs for weekdays -->
           <div class="tabs">
             <button
-              *ngFor="let day of days"
+              *ngFor="let day of week"
               class="tab-button"
               [class.active]="selectedDay === day"
-              (click)="selectedDay = day; getExpensesByDay(selectedDay)"
-              [disabled]="isFutureDay(day)"
+              (click)="
+                selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)
+              "
+              [disabled]="isDateInFutureOrPast(day.date)"
             >
-              {{ day }}
+              {{ day.dayName }}
             </button>
           </div>
 
@@ -36,8 +38,6 @@
             <button class="button" (click)="toggleExpenseForm()">
               {{ showExpenseForm ? "Back" : "Add Expense" }}
             </button>
-
-            <!-- <button class="button save-button" *ngIf="showExpenseForm" (click)="saveExpense(selectedDay)">Save</button> -->
             <button class="button save-button" (click)="toggleWeeklyOverview()">
               Weekly Overview
             </button>
@@ -59,7 +59,7 @@
           <!-- Expense Form -->
           <ng-container *ngIf="showExpenseForm">
             <div class="expense-form">
-              <h3>Expenses for {{ selectedDay }}</h3>
+              <h3>Expenses for {{ selectedDay!.dayName }}</h3>
 
               <label>Expense Name:</label>
               <input
@@ -72,11 +72,7 @@
                 placeholder="Enter expense name"
               />
 
-              <label
-                >Add or select category
-                <!-- <button class="add-category-button"
-                                  (click)="toggleCategoryPopup()">+</button> -->
-              </label>
+              <label>Add or select category </label>
               <div class="category-container">
                 <select
                   #expCategory
@@ -94,24 +90,6 @@
                     {{ category }}
                   </option>
                 </select>
-              </div>
-
-              <div *ngIf="showCategoryPopup" class="category-popup-overlay">
-                <div class="category-popup">
-                  <h3>Add New Category</h3>
-                  <input
-                    type="text"
-                    [(ngModel)]="newCategory"
-                    placeholder="Enter new category"
-                  />
-                  <button class="button" (click)="addCategory()">Add</button>
-                  <button
-                    class="button cancel-button"
-                    (click)="toggleCategoryPopup()"
-                  >
-                    Cancel
-                  </button>
-                </div>
               </div>
 
               <label>Amount:</label>
@@ -141,24 +119,17 @@
           >
             <div class="expense-list">
               <h4>Existing Expenses</h4>
-              <div class="expense-item" *ngFor="let _expense of dailyExpenses">
+              <div class="expense-item" *ngFor="let _expense of expenses2">
                 <div class="expense-info">
                   <span class="expense-name">{{ _expense.name }}</span>
                   <span class="expense-category">{{ _expense.category }}</span>
                 </div>
                 <div class="expense-amount">
                   {{ _expense.amount }} €
-                  <button
-                    class="edit-btn"
-                    (click)="editExpense(_expense)"
-                    (click)="toggleExpenseForm()"
-                  >
+                  <button class="edit-btn" (click)="turnOnUpdateMode(_expense)">
                     Edit
                   </button>
-                  <button
-                    class="delete-btn"
-                    (click)="deleteExpense(_expense.id)"
-                  >
+                  <button class="delete-btn" (click)="deleteExpense2(_expense)">
                     Delete
                   </button>
                 </div>
@@ -166,18 +137,11 @@
             </div>
           </ng-container>
 
-          <!--                            <label>Amount:</label>
-                            <input #expAmount type="number" placeholder="Enter an amount"
-                                (input)="validateAmount($event)" (keypress)="onKeyPress($event)" step="0.01"
-                                min="0.01" /> -->
-          <!--                         </div> -->
-          <!--                     </ng-container> -->
-
           <button
             [disabled]="isSaveDisabled"
             class="weekly-overview-button"
             *ngIf="showExpenseForm"
-            (click)="isEditing ? updateExpense() : saveExpense(selectedDay)"
+            (click)="isEditing ? updateExpense2() : addExpense()"
           >
             {{ isEditing ? "Update" : "Save" }}
           </button>
@@ -187,13 +151,13 @@
           <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}</h2>
           <ul class="week-summary">
             <li
-              *ngFor="let day of days"
+              *ngFor="let day of weeklySpending"
               (click)="toggleDayExpenses(day)"
               class="clickable-day"
             >
-              {{ day }}: {{ dailyTotals[day] }} €
+              {{ day.dayName }}: {{ day.total }}€
               <div *ngIf="expendedDay === day" class="expense-list">
-                <h4>Expenses for {{ day }}</h4>
+                <h4>Expenses for {{ day.dayName }}</h4>
                 <div *ngIf="expendedDayExpenses.length > 0">
                   <div
                     class="expense-item"
@@ -209,7 +173,7 @@
                   </div>
                 </div>
                 <p *ngIf="expendedDayExpenses.length === 0">
-                  No expenses recorded for {{ day }}
+                  No expenses recorded for {{ day.dayName }}
                 </p>
               </div>
             </li>
@@ -229,7 +193,7 @@
           <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
-          <button class="button" (click)="addExpense()">
+          <button class="button" (click)="loadExpenses()">
             Export your expeses to excel
           </button>
           <button class="button" (click)="toggleWeeklyOverview()">
