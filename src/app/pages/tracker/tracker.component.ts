@@ -95,6 +95,7 @@ export class TrackerComponent implements OnInit {
 
   async loadCategories() {
     this.categories = await this.crudService.getCategories();
+    console.log("Loaded categories:", this.categories);
   }
 
   toggleCategoryPopup() {
@@ -152,22 +153,26 @@ export class TrackerComponent implements OnInit {
   }
 
   async saveExpense(day: DayOfWeek) {
+    console.log("Saving expense with category:", this.selectedCategory);
+
     const selectedCategoryObj = this.categories.find(cat => cat.name === this.selectedCategory);
     if (!selectedCategoryObj) {
-        console.error("Selected category not found");
+        console.error("Selected category not found:", this.selectedCategory);
         return;
     }
 
     this._newExpense.name = this.expenseName;
-    this._newExpense.category = selectedCategoryObj;
+    this._newExpense.category = selectedCategoryObj; 
     this._newExpense.amount = this.expenseAmount!;
     this._newExpense.userId = this.currentUserId;
+
     this.showExpenseForm = false;
     this.resetForm();
+
     await this.crudService.addItem(day, this._newExpense);
     await this.getDailyTotal();
     this.getExpensesByDay(this.selectedDay);
-  }
+}
 
   async deleteExpense(id: string) {
     this.confirmDialogService.confirm({
