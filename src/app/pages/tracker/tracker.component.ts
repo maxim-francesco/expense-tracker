@@ -67,14 +67,18 @@ export class TrackerComponent implements OnInit {
 
   //Excel-------------------------------------------------------------
 
-  data = [
-    { Name: 'John Doe', Age: 30, City: 'New York' },
-    { Name: 'Jane Smith', Age: 25, City: 'San Francisco' },
-    // Add more data as needed
-  ];
-
   exportToExcel(): void {
-    this.excelService.generateExcel(this.data, 'user_data');
+    const dataForExcel = this.weeklySpending.flatMap((day) =>
+      day.expenses.map((expense) => ({
+        Date: day.date,
+        Day: day.dayName,
+        Name: expense.name,
+        Category: expense.category,
+        Amount: expense.amount,
+      }))
+    );
+
+    this.excelService.generateExcel(dataForExcel, 'Weekly_Expenses');
   }
 
   //------------------------------------------------------------------
