@@ -32,6 +32,7 @@ import { AuthService } from '../../services/auth.service';
 interface DaySpending {
   date: string;
   dayName: string;
+  expenses: Expense2[];
   total: number;
 }
 
@@ -304,13 +305,9 @@ export class TrackerComponent implements OnInit {
   }
 
   loadExpensesForUserOnDate(date: string) {
-    console.log(date);
-
     this.expensesCrudService
       .loadExpensesForUserOnDate(this.authService.getId()!, date)
       .subscribe((expenses) => {
-        console.log(expenses);
-
         this.expenses2 = expenses;
       });
   }
@@ -321,7 +318,7 @@ export class TrackerComponent implements OnInit {
     this.expensesCrudService
       .getExpensesForUser(this.authService.getId()!)
       .subscribe((expenses) => {
-        const weeklySpending = week.map((day) => {
+        this.weeklySpending = week.map((day) => {
           const expensesForDay = expenses.filter(
             (exp) => exp.date === day.date
           );
@@ -333,15 +330,31 @@ export class TrackerComponent implements OnInit {
           return {
             date: day.date,
             dayName: day.dayName,
-            total,
+            expenses: expensesForDay,
+            total: total,
           };
         });
-
-        console.log('Spending for provided week:', weeklySpending);
-
-        // Dacă vrei să salvezi într-un state din component:
-        this.weeklySpending = weeklySpending;
       });
+  }
+
+  getWeeklyTotal(): number {
+    return this.weeklySpending.reduce((sum, day) => sum + day.total, 0);
+  }
+
+  getWeeklyCategoryTotals(): { category: string; total: number }[] {
+    const categoryMap = new Map<string, number>();
+
+    for (const day of this.weeklySpending) {
+      for (const expense of day.expenses) {
+        const currentAmount = categoryMap.get(expense.category) || 0;
+        categoryMap.set(expense.category, currentAmount + expense.amount);
+      }
+    }
+
+    return Array.from(categoryMap.entries()).map(([category, total]) => ({
+      category,
+      total,
+    }));
   }
 
   //UPDATE
@@ -404,127 +417,7 @@ export class TrackerComponent implements OnInit {
 
   //--------------------------------------------------------------------
 
-  errorMessage: string = '';
-  selectedCategory: string = '';
-  isSaveDisabled: boolean = true;
-  expenseName: string = '';
-  expenseAmount: number | null = null;
-
-  dailyTotals: { [key in DayOfWeek]: number } = {
-    Monday: 0,
-    Tuesday: 0,
-    Wednesday: 0,
-    Thursday: 0,
-    Friday: 0,
-    Saturday: 0,
-    Sunday: 0,
-  };
-
-  showCategoryPopup = false;
-  showExpenseForm = false;
-  showWeeklyOverview = false;
-  showAnalysisOverview = false;
-  showAIExpertiseOverview = false;
-  isEditing = false;
-  editingExpenseId: string | null = null;
-
-  expendedDay: { date: string; dayName: string } | null = null;
-  expendedDayExpenses: Expense2[] = [];
-
-  toggleCategoryPopup() {
-    this.showCategoryPopup = !this.showCategoryPopup;
-  }
-
-  toggleExpenseForm() {
-    this.showExpenseForm = !this.showExpenseForm;
-    if (!this.showExpenseForm) {
-      this.resetForm();
-    }
-  }
-
-  toggleWeeklyOverview() {
-    this.showWeeklyOverview = !this.showWeeklyOverview;
-    this.showExpenseForm = false;
-    this.showAnalysisOverview = false;
-    this.loadExpensesForWeek(this.week);
-  }
-
-  toggleAnalysisOverview() {
-    this.showAnalysisOverview = !this.showAnalysisOverview;
-    this.showExpenseForm = false;
-    this.showWeeklyOverview = false;
-  }
-
-  toggleAIExpertiseOverview() {
-    this.showAIExpertiseOverview = !this.showAIExpertiseOverview;
-    this.showAnalysisOverview = !this.showAnalysisOverview;
-  }
-
-  // getCurrentDay(): DayOfWeek {
-  //   const today = new Date();
-  //   const weekdays = [
-  //     'Sunday',
-  //     'Monday',
-  //     'Tuesday',
-  //     'Wednesday',
-  //     'Thursday',
-  //     'Friday',
-  //     'Saturday',
-  //   ];
-  //   return weekdays[today.getDay()] as DayOfWeek;
-  // }
-
-  // getCurrentAvailableDay(): DayOfWeek {
-  //   const currentDay = this.getCurrentDay() as DayOfWeek;
-  //   return this.days.includes(currentDay)
-  //     ? currentDay
-  //     : (this.days[0] as DayOfWeek);
-  // }
-
-  async getExpensesByDay(day: DayOfWeek) {
-    // this.dailyExpenses = await this.crudService.getByDay(day);
-  }
-
-  getWeeklyTotal() {
-    // return Object.values(this.dailyTotals).reduce(
-    //   (totalSum, dailyAmount) => totalSum + dailyAmount,
-    //   0
-    // );
-  }
-
-  onDayChanged(day: DayOfWeek) {
-    // this.selectedDay = day;
-    this.ngOnInit();
-  }
-
-  isFutureDay(day: DayOfWeek): boolean {
-    const today = new Date();
-    const dayIndex = this.days.indexOf(day);
-    const todayIndex = today.getDay() - 1; // getDay() returns 0 (Sunday) to 6 (Saturday), so adjust for array indexing
-    if (todayIndex < 0) {
-      // Adjust for when today is Sunday (index -1 in our array)
-      return dayIndex !== 0;
-    }
-    return dayIndex > todayIndex;
-  }
-
-  async toggleDayExpenses(day: { date: string; dayName: string }) {
-    if (this.expendedDay === day) {
-      this.expendedDay = null;
-      this.expendedDayExpenses = [];
-    } else {
-      this.expendedDay = day;
-      // this.expendedDayExpenses = await this.crudService.getByDay(day);
-      this.expensesCrudService
-        .loadExpensesForUserOnDate(this.authService.getId()!, day.date)
-        .subscribe((expenses) => {
-          this.expendedDayExpenses = expenses;
-        });
-      this.cdr.detectChanges();
-    }
-  }
-
-  //////////////
+  //UI -----------------------------------------------------------------
 
   onKeyPress(event: KeyboardEvent): boolean {
     const charCode = event.which || event.keyCode;
@@ -593,5 +486,66 @@ export class TrackerComponent implements OnInit {
     this.expenseAmount = null;
     this.isEditing = false;
     this.editingExpenseId = null;
+  }
+
+  errorMessage: string = '';
+  selectedCategory: string = '';
+  isSaveDisabled: boolean = true;
+  expenseName: string = '';
+  expenseAmount: number | null = null;
+
+  showCategoryPopup = false;
+  showExpenseForm = false;
+  showWeeklyOverview = false;
+  showAnalysisOverview = false;
+  showAIExpertiseOverview = false;
+  isEditing = false;
+  editingExpenseId: string | null = null;
+
+  expendedDay: { date: string; dayName: string } | null = null;
+  expendedDayExpenses: Expense2[] = [];
+
+  toggleCategoryPopup() {
+    this.showCategoryPopup = !this.showCategoryPopup;
+  }
+
+  toggleExpenseForm() {
+    this.showExpenseForm = !this.showExpenseForm;
+    if (!this.showExpenseForm) {
+      this.resetForm();
+    }
+  }
+
+  toggleWeeklyOverview() {
+    this.showWeeklyOverview = !this.showWeeklyOverview;
+    this.showExpenseForm = false;
+    this.showAnalysisOverview = false;
+    this.loadExpensesForWeek(this.week);
+  }
+
+  toggleAnalysisOverview() {
+    this.showAnalysisOverview = !this.showAnalysisOverview;
+    this.showExpenseForm = false;
+    this.showWeeklyOverview = false;
+  }
+
+  toggleAIExpertiseOverview() {
+    this.showAIExpertiseOverview = !this.showAIExpertiseOverview;
+    this.showAnalysisOverview = !this.showAnalysisOverview;
+  }
+
+  async toggleDayExpenses(day: { date: string; dayName: string }) {
+    if (this.expendedDay === day) {
+      this.expendedDay = null;
+      this.expendedDayExpenses = [];
+    } else {
+      this.expendedDay = day;
+      this.expensesCrudService
+        .loadExpensesForUserOnDate(this.authService.getId()!, day.date)
+        .subscribe((expenses) => {
+          this.expendedDayExpenses = expenses;
+        });
+      this.cdr.detectChanges();
+    }
   }
 }

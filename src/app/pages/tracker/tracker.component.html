@@ -148,7 +148,7 @@
         </ng-container>
 
         <ng-container *ngIf="showWeeklyOverview">
-          <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}</h2>
+          <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}$</h2>
           <ul class="week-summary">
             <li
               *ngFor="let day of weeklySpending"
@@ -189,7 +189,10 @@
         <!-- here goes analysis -->
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
-          <app-pie></app-pie>
+          <app-pie
+            [categoryTotals]="getWeeklyCategoryTotals()"
+            [weeklyTotal]="getWeeklyTotal()"
+          ></app-pie>
           <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
