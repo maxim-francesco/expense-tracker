@@ -48,7 +48,7 @@
                     isEditing ? validateFormAtUpdate() : validateFormAtSave()
                   " required>
                   <option value="" disabled selected>Select Category</option>
-                  <option *ngFor="let category of categories" [value]="category">
+                  <option *ngFor="let category of categories" [value]="category.name">
                     {{ category.name }}
                   </option>
                 </select>
@@ -96,7 +96,7 @@
               <div class="expense-item" *ngFor="let _expense of dailyExpenses">
                 <div class="expense-info">
                   <span class="expense-name">{{ _expense.name }}</span>
-                  <span class="expense-category">{{ _expense.category }}</span>
+                  <span class="expense-category">{{ _expense.category.name }}</span>
                 </div>
                 <div class="expense-amount">
                   {{ _expense.amount }} €
