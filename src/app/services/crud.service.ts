@@ -10,11 +10,11 @@ import { timestamp } from 'rxjs';
 })
 export class CrudService {
   private readonly days: DayOfWeek[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  private readonly categories: Category[] = ['Groceries', 'Taxes', 'Entertainment', 'Education', 'Clothing', 'Healthcare', 'Sports', 'Travel', 'Gifts', 'Miscellaneous'];
+ // private readonly categories: Category[] = ['Groceries', 'Taxes', 'Entertainment', 'Education', 'Clothing', 'Healthcare', 'Sports', 'Travel', 'Gifts', 'Miscellaneous'];
 
   private firestore: Firestore = inject(Firestore);
 
-  private decimalPipe : DecimalPipe = new DecimalPipe('en-US');
+  private decimalPipe: DecimalPipe = new DecimalPipe('en-US');
 
   constructor(private authService: AuthService) { }
 
@@ -224,5 +224,98 @@ export class CrudService {
 
     return dailyTotals;
   }
+
+  async getDefaultCategories(): Promise<Category[]> {
+    try {
+      const querySnapshot = await getDocs(collection(this.firestore, 'defaultCategories'));
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: (doc.data() as { name: string })['name'],
+        isDefault: true
+      }));
+    } catch (error) {
+      console.error('Error fetching default categories:', error);
+      return [];
+    }
+  }
+
+
+  async addCategory(name: string): Promise<string | null> {
+    try {
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return null;
+      }
+  
+      const docRef = await addDoc(collection(this.firestore, 'categories'), { 
+        name, 
+        userId, 
+        isDefault: false 
+      });
+  
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding category:', error);
+      return null;
+    }
+  }
+
+  async getCategories(): Promise<Category[]> {
+    try {
+      const userId = this.getCurrentUserId();
+      if (!userId) {
+        console.error('No user is logged in');
+        return [];
+      }
+  
+      const defaultCategories = await this.getDefaultCategories();
+  
+      const q = query(collection(this.firestore, 'categories'), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const userCategories = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: (doc.data() as { name: string })['name'],
+        isDefault: false 
+      }));
+  
+      return [...defaultCategories, ...userCategories];
+
+    } catch (error) {
+      console.error('Error fetching user categories:', error);
+      return [];
+    }
+  }
+
+
+  async updateCategory(id: string, newName: string, isDefault: boolean): Promise<boolean> {
+    if (isDefault) {
+      alert("You cannot update default categories!");
+      return false;
+    }
+  
+    try {
+      await updateDoc(doc(this.firestore, 'categories', id), { name: newName });
+      return true;
+    } catch (error) {
+      console.error('Error updating category:', error);
+      return false;
+    }
+  }
+
+  async deleteCategory(id: string, isDefault: boolean): Promise<boolean> {
+    if (isDefault) {
+      alert("You cannot delete default categories!");
+      return false;
+    }
+  
+    try {
+      await deleteDoc(doc(this.firestore, 'categories', id));
+      return true;
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      return false;
+    }
+  }  
 
 }
