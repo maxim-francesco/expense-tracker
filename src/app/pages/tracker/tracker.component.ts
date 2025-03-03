@@ -87,7 +87,7 @@ export class TrackerComponent implements OnInit {
 
   imageUrl: string | ArrayBuffer | null = null;
   extractedText: string = '';
-  extractedExpenses: Expense[] = [];
+  extractedExpenses: Expense2[] = [];
   selectedFile: File | null = null;
 
   onFileSelected(event: Event): void {
@@ -111,39 +111,39 @@ export class TrackerComponent implements OnInit {
         if (response.responses && response.responses.length > 0) {
           this.extractedText =
             response.responses[0].fullTextAnnotation?.text || '';
-          this.sendToGemini(this.extractedText);
+          this.scanReceiptAndExtractExpenses(this.extractedText);
         }
       });
     };
     reader.readAsDataURL(this.selectedFile);
   }
 
-  sendToGemini(ocrText: string) {
-    this.geminiService.extractExpenses(ocrText).subscribe(async (response) => {
-      try {
-        const rawText = response.candidates[0].content.parts[0].text;
+  scanReceiptAndExtractExpenses(ocrText: string): void {
+    const userId = this.authService.getId()!;
+    const today = new Date().toISOString().split('T')[0];
 
-        // Curățăm delimitatorii de bloc de cod
-        const cleanedText = rawText
-          .replace(/^```json\s*/, '')
-          .replace(/```$/, '');
+    this.geminiService.extractExpenses(ocrText).subscribe((response) => {
+      let rawText = response.candidates[0]?.content?.parts[0]?.text || '[]';
 
-        // Parsăm JSON-ul curățat
-        this.extractedExpenses = JSON.parse(cleanedText);
-        console.log(this.extractedExpenses);
+      const cleanedText = rawText
+        .replace(/^```json\s*/, '')
+        .replace(/```$/, '');
 
-        this.addExpensesFromExtractedText(this.extractedExpenses);
-        // this.getExpensesByDay(this.selectedDay);
-      } catch (error) {
-        console.error('Eroare la parsarea răspunsului Gemini:', error);
-        this.extractedExpenses = []; // Evităm afișarea de date corupte în UI
-      }
+      const extractedExpenses = JSON.parse(cleanedText);
+
+      this.extractedExpenses = extractedExpenses.map((expense: any) => ({
+        ...expense,
+        date: today,
+        userId: userId,
+      }));
+
+      this.addExtractedExpensesToDatabase(this.extractedExpenses);
     });
   }
 
-  addExpensesFromExtractedText(expenses: Expense[]) {
+  addExtractedExpensesToDatabase(expenses: Expense2[]) {
     expenses.forEach((expense) => {
-      // this.crudService.addItem(this.selectedDay, expense);
+      this.addExpense(expense);
     });
   }
 
@@ -181,16 +181,6 @@ export class TrackerComponent implements OnInit {
     'Travel',
     'Gifts',
     'Miscellaneous',
-  ];
-
-  days: DayOfWeek[] = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
   ];
 
   selectedDay: { date: string; dayName: string } | undefined = undefined;
@@ -262,11 +252,7 @@ export class TrackerComponent implements OnInit {
 
   isDateInFutureOrPast(dateString: string): boolean {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // curățăm ora ca să comparăm doar datele calendaristice
-
     const inputDate = new Date(dateString);
-    inputDate.setHours(0, 0, 0, 0); // și input-ul curățat de oră
-
     return inputDate > today; // true = viitor, false = trecut sau azi
   }
 
@@ -305,9 +291,13 @@ export class TrackerComponent implements OnInit {
     this.showExpenseForm = false;
   }
 
-  addExpense(): void {
+  addExpenseFromForm(): void {
     const newExpense = this.createNewItem();
     this.resetSavingForm();
+    this.addExpense(newExpense);
+  }
+
+  addExpense(newExpense: Expense2) {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
     });

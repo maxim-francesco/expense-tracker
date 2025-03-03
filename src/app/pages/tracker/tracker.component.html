@@ -141,7 +141,7 @@
             [disabled]="isSaveDisabled"
             class="weekly-overview-button"
             *ngIf="showExpenseForm"
-            (click)="isEditing ? updateExpense2() : addExpense()"
+            (click)="isEditing ? updateExpense2() : addExpenseFromForm()"
           >
             {{ isEditing ? "Update" : "Save" }}
           </button>
