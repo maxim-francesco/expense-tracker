@@ -627,4 +627,17 @@ export class TrackerComponent implements OnInit {
   //     this.categories = this.categories.filter((cat) => cat.id !== category.id);
   //   }
   // }
+
+
+  getFormattedWeekRange(): string {
+    const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
+   
+    const formatDate = (date: Date): string => {
+      const day = date.getDate().toString().padStart(2, '0');
+      const monthAbbr = date.toLocaleString('en-US', { month: 'short' });
+      return `${day}.${monthAbbr}`;
+    };
+   
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  }
 }
