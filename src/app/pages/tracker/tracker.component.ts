@@ -34,6 +34,7 @@ interface DaySpending {
   dayName: string;
   expenses: Expense2[];
   total: number;
+  isExpanded?: boolean;
 }
 
 @Component({
@@ -47,15 +48,15 @@ export class TrackerComponent implements OnInit {
   //Services---------------------------------------------------------
   constructor(
     private authService: AuthService,
-    private trackerConfigService: TrackerConfigService,
-    private crudService: CrudService,
+    //private trackerConfigService: TrackerConfigService,
+    //private crudService: CrudService,
     private cdr: ChangeDetectorRef,
     private confirmDialogService: ConfirmDialogService,
     private excelService: ExcelService,
     private ocrService: OcrService,
     private geminiService: GeminiService,
     private expensesCrudService: ExpensesCrudService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadTodayExpenses();
@@ -345,6 +346,7 @@ export class TrackerComponent implements OnInit {
             dayName: day.dayName,
             expenses: expensesForDay,
             total: total,
+            isExpanded: true
           };
         });
       });
@@ -548,19 +550,32 @@ export class TrackerComponent implements OnInit {
     this.sendWeeklyExpensesToGemini();
   }
 
-  async toggleDayExpenses(day: { date: string; dayName: string }) {
-    if (this.expendedDay === day) {
-      this.expendedDay = null;
-      this.expendedDayExpenses = [];
-    } else {
-      this.expendedDay = day;
+  // async toggleDayExpenses(day: { date: string; dayName: string }) {
+  //   if (this.expendedDay === day) {
+  //     this.expendedDay = null;
+  //     this.expendedDayExpenses = [];
+  //   } else {
+  //     this.expendedDay = day;
+  //     this.expensesCrudService
+  //       .loadExpensesForUserOnDate(this.authService.getId()!, day.date)
+  //       .subscribe((expenses) => {
+  //         this.expendedDayExpenses = expenses;
+  //       });
+  //     this.cdr.detectChanges();
+  //   }
+  // }
+
+  async toggleDayExpenses(day: DaySpending) {
+    day.isExpanded = !day.isExpanded;
+    if (day.isExpanded && (!day.expenses || day.expenses.length === 0)) {
       this.expensesCrudService
         .loadExpensesForUserOnDate(this.authService.getId()!, day.date)
         .subscribe((expenses) => {
-          this.expendedDayExpenses = expenses;
+          day.expenses = expenses;
+          this.cdr.detectChanges();
         });
-      this.cdr.detectChanges();
     }
+    this.cdr.detectChanges();
   }
 
   //Category

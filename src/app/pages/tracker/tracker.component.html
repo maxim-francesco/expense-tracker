@@ -156,12 +156,12 @@
               class="clickable-day"
             >
               {{ day.dayName }}: {{ day.total }}€
-              <div *ngIf="expendedDay === day" class="expense-list">
+              <div *ngIf="day.isExpanded" class="expense-list">
                 <h4>Expenses for {{ day.dayName }}</h4>
-                <div *ngIf="expendedDayExpenses.length > 0">
+                <div *ngIf="day.expenses && day.expenses.length > 0">
                   <div
                     class="expense-item"
-                    *ngFor="let _expense of expendedDayExpenses"
+                    *ngFor="let _expense of day.expenses"
                   >
                     <div class="expense-info">
                       <span class="expense-name">{{ _expense.name }}</span>
@@ -172,7 +172,7 @@
                     <div class="expense-amount">{{ _expense.amount }} €</div>
                   </div>
                 </div>
-                <p *ngIf="expendedDayExpenses.length === 0">
+                <p *ngIf="day.expenses.length === 0">
                   No expenses recorded for {{ day.dayName }}
                 </p>
               </div>

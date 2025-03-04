@@ -15,6 +15,9 @@ const envFile = `export const firebaseConfig = {
     googleVisionApiKey: '${process.env.googleVisionApiKey}',
     geminiApiKey: '${process.env.geminiApiKey}',
     databaseURL: '${process.env.databaseURL}',
+    googleVisionApiKey: '${process.env.GOGL_VISION}',
+    geminiApiKey: '${process.env.GMNI}',
+    databaseURL: '${process.env.DB_URL}',
 };
 `;
 const targetPath = path.join(__dirname, "./src/environment.ts");
