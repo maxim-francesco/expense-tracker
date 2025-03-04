@@ -28,7 +28,6 @@
               (click)="
                 selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)
               "
-              [disabled]="isDateInFutureOrPast(day.date)"
             >
               {{ day.dayName }}
             </button>
