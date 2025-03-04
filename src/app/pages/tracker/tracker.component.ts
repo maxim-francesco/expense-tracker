@@ -269,6 +269,7 @@ export class TrackerComponent implements OnInit {
     this.displayedWeekStart = startDate;
     this.week = this.getCurrentWeekWithDays(startDate);
     this.selectedDay = this.findDayByDate(startDate);
+    this.expenses2 = [];
     this.loadExpensesForWeek(this.week);  // Load expenses for the selected week
   }
 
@@ -336,6 +337,7 @@ export class TrackerComponent implements OnInit {
     this.expensesCrudService
       .getExpensesForUser(this.authService.getId()!)
       .subscribe((expenses) => {
+        this.expenses2 = [];
         this.weeklySpending = week.map((day) => {
           const expensesForDay = expenses.filter(
             (exp) => exp.date === day.date
@@ -352,6 +354,10 @@ export class TrackerComponent implements OnInit {
             total: total,
           };
         });
+
+        this.selectedDay = this.week[0];
+
+        this.loadExpensesForUserOnDate(this.selectedDay.date);
       });
   }
 
@@ -644,6 +650,9 @@ export class TrackerComponent implements OnInit {
     firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7);  // Move back a week
 
     this.displayedWeekStart = firstDayOfWeek.toISOString().split('T')[0];
+
+    this.expenses2 = []; //clear expenses
+
     this.loadWeekDays(this.displayedWeekStart);
   }
 
@@ -654,6 +663,9 @@ export class TrackerComponent implements OnInit {
     firstDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);  // Move forward a week
 
     this.displayedWeekStart = firstDayOfWeek.toISOString().split('T')[0];
+
+    this.expenses2 = []; //clear expenses
+
     this.loadWeekDays(this.displayedWeekStart);
   }
 
