@@ -55,12 +55,17 @@ export class TrackerComponent implements OnInit {
     private ocrService: OcrService,
     private geminiService: GeminiService,
     private expensesCrudService: ExpensesCrudService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadTodayExpenses();
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
+
+
+    const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
+    this.currentWeekStart = startDate.toISOString().split('T')[0];
+    this.currentWeekEnd = endDate.toISOString().split('T')[0];
   }
 
   //------------------------------------------------------------------
@@ -205,35 +210,35 @@ export class TrackerComponent implements OnInit {
   }
 
   // 2️⃣ Funcție nouă: vector cu 7 zile - nume + dată (Luni-Duminică)
-  getCurrentWeekWithDays(): { date: string; dayName: string }[] {
-    const today = new Date();
-
-    // Aflăm care e prima zi din săptămână (Luni)
-    const dayOfWeek = today.getDay();
-    const monday = new Date(today);
+  getCurrentWeekWithDays(startDate: string = new Date().toISOString().split('T')[0]): { date: string; dayName: string }[] {
+    const date = new Date(startDate);
+   
+    // Get the first day of the week (Monday)
+    const dayOfWeek = date.getDay();
+    const monday = new Date(date);
     if (dayOfWeek === 0) {
-      // dacă azi e duminică, ne întoarcem 6 zile înapoi
-      monday.setDate(today.getDate() - 6);
+      // If today is Sunday, move back 6 days to Monday
+      monday.setDate(date.getDate() - 6);
     } else {
-      // altfel, ne întoarcem cu (dayOfWeek - 1)
-      monday.setDate(today.getDate() - (dayOfWeek - 1));
+      // Otherwise, move back (dayOfWeek - 1) days
+      monday.setDate(date.getDate() - (dayOfWeek - 1));
     }
-
-    // Construim array-ul cu 7 zile (Luni -> Duminică)
+   
+    // Generate the week (Monday - Sunday)
     const week: { date: string; dayName: string }[] = [];
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(monday);
       currentDate.setDate(monday.getDate() + i);
-
-      const dateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
-      const dayName = this.getDayOfWeek(dateStr);
-
-      week.push({ date: dateStr, dayName });
+   
+      week.push({
+        date: currentDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+        dayName: this.getDayOfWeek(currentDate.toISOString().split('T')[0]),
+      });
     }
-
+   
     return week;
   }
-
+  
   // Helper: ziua săptămânii pentru o dată dată (folosită și în ambele metode)
   private getDayOfWeek(dateString: string): string {
     const daysOfWeek = [
@@ -260,13 +265,12 @@ export class TrackerComponent implements OnInit {
     return this.week.find((day) => day.date === date);
   }
 
-  loadWeekDays() {
-    this.week = this.getCurrentWeekWithDays();
-    this.selectedDay = this.findDayByDate(
-      new Date().toISOString().split('T')[0]
-    );
+  loadWeekDays(startDate: string = new Date().toISOString().split('T')[0]) {
+    this.week = this.getCurrentWeekWithDays(startDate);
+    this.selectedDay = this.findDayByDate(startDate);
+    this.loadExpensesForWeek(this.week);  // Load expenses for the selected week
   }
-
+   
   //------------------------------------------------------------------
 
   //CRUD EXPENSES------------------------------------------------------
@@ -631,13 +635,38 @@ export class TrackerComponent implements OnInit {
 
   getFormattedWeekRange(): string {
     const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
-   
+
     const formatDate = (date: Date): string => {
       const day = date.getDate().toString().padStart(2, '0');
       const monthAbbr = date.toLocaleString('en-US', { month: 'short' });
       return `${day}.${monthAbbr}`;
     };
-   
+
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   }
+
+  currentWeekStart: string = '';  // Start date of the current week
+  currentWeekEnd: string = '';    // End date of the current week
+
+  goToPreviousWeek() {
+    const firstDayOfWeek = new Date(this.week[0].date);
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7);  // Go back 7 days
+
+    this.loadWeekDays(firstDayOfWeek.toISOString().split('T')[0]);
+  }
+
+  goToNextWeek() {
+    if (this.isCurrentWeek()) return; // Prevent moving forward if it's the current week
+
+    const firstDayOfWeek = new Date(this.week[0].date);
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);  // Move forward 7 days
+
+    this.loadWeekDays(firstDayOfWeek.toISOString().split('T')[0]);
+  }
+
+  isCurrentWeek(): boolean {
+    return this.week[0].date === this.currentWeekStart;
+  }
+
+
 }
