@@ -21,6 +21,12 @@
         >
           <!-- Tabs for weekdays -->
           <div class="tabs">
+            <!-- Previous Week Button -->
+            <button (click)="goToPreviousWeek()">← Previous</button>
+            <!-- Next Week Button -->
+            <button (click)="goToNextWeek()" [disabled]="isCurrentWeek()">
+              Next →
+            </button>
             <button
               *ngFor="let day of week"
               class="tab-button"
@@ -218,6 +224,6 @@
   </div>
 </div>
 
-<p>Week:{{getFormattedWeekRange()}}</p>
+<p>Week:{{ getFormattedWeekRange() }}</p>
 
 <app-chatbot></app-chatbot>
