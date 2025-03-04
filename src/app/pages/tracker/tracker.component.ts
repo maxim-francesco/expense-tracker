@@ -28,6 +28,7 @@ import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
 import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
+import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 
 interface DaySpending {
   date: string;
@@ -54,7 +55,8 @@ export class TrackerComponent implements OnInit {
     private excelService: ExcelService,
     private ocrService: OcrService,
     private geminiService: GeminiService,
-    private expensesCrudService: ExpensesCrudService
+    private expensesCrudService: ExpensesCrudService,
+    private categoryCrudService: CategoryCrudService,
   ) {}
 
   ngOnInit() {
@@ -518,8 +520,12 @@ export class TrackerComponent implements OnInit {
   expendedDay: { date: string; dayName: string } | null = null;
   expendedDayExpenses: Expense2[] = [];
 
+  newCategory = '';
+  newCategoryObj: _Category = {name: this.newCategory};
+
   toggleCategoryPopup() {
     this.showCategoryPopup = !this.showCategoryPopup;
+    this.newCategory = '';
   }
 
   toggleExpenseForm() {
@@ -563,68 +569,8 @@ export class TrackerComponent implements OnInit {
     }
   }
 
-  //Category
-
-  // async addCategory() {
-  //   if (this.newCategory.trim() === '') return;
-  //   const existingCategory = this.categories.find(
-  //     (cat) => cat.name.toLowerCase() === this.newCategory.toLowerCase()
-  //   );
-  //   if (existingCategory) {
-  //     //alert('Category already exists!');
-  //     return;
-  //   }
-
-  //   const newCategoryId = await this.crudService.addCategory(this.newCategory);
-  //   if (newCategoryId) {
-  //     this.categories.push({
-  //       id: newCategoryId,
-  //       name: this.newCategory,
-  //       isDefault: false,
-  //     });
-  //   }
-  //   this.newCategory = '';
-  //   this.showCategoryPopup = false;
-  // }
-
-  // editCategory(category: Category) {
-  //   if (category.isDefault) {
-  //     //alert("You cannot edit default categories!");
-  //     return;
-  //   }
-  //   this.editingCategory = category.id;
-  //   this.editedCategory = category.name;
-  // }
-
-  // async saveEditedCategory() {
-  //   if (!this.editedCategory.trim()) return;
-  //   const categoryToUpdate = this.categories.find(
-  //     (cat) => cat.id === this.editingCategory
-  //   );
-  //   if (categoryToUpdate && !categoryToUpdate.isDefault) {
-  //     const success = await this.crudService.updateCategory(
-  //       categoryToUpdate.id,
-  //       this.editedCategory,
-  //       categoryToUpdate.isDefault
-  //     );
-  //     if (success) {
-  //       categoryToUpdate.name = this.editedCategory;
-  //     }
-  //   }
-  //   this.editingCategory = null;
-  // }
-
-  // async deleteCategory(category: { id: string; isDefault: boolean }) {
-  //   if (category.isDefault) {
-  //     // alert("You cannot delete default categories!");
-  //     return;
-  //   }
-  //   const success = await this.crudService.deleteCategory(
-  //     category.id,
-  //     category.isDefault
-  //   );
-  //   if (success) {
-  //     this.categories = this.categories.filter((cat) => cat.id !== category.id);
-  //   }
-  // }
+  addCategory() {
+    this.newCategoryObj.name = this.newCategory;
+    this.categoryCrudService.addCategory(this.newCategoryObj).subscribe((response) => {});
+  }
 }

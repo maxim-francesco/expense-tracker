@@ -72,7 +72,9 @@
                 placeholder="Enter expense name"
               />
 
-              <label>Add or select category </label>
+              <label>Add or select category
+                <button class="add-category-button" (click)="toggleCategoryPopup()">+</button>
+              </label>
               <div class="category-container">
                 <select
                   #expCategory
@@ -90,6 +92,33 @@
                     {{ category }}
                   </option>
                 </select>
+              </div>
+
+              <div *ngIf="showCategoryPopup" class="category-popup-overlay">
+                <div class="category-popup">
+                  <h3>Manage Categories</h3>
+                  <input type="text" [(ngModel)]="newCategory" placeholder="Enter new category" />
+                  <button class="button" (click)="addCategory()">Add</button>
+
+                  <ul class="category-list">
+                    <li *ngFor="let category of categories">
+                      <span>{{ category }}</span>
+
+                      <div class="category-buttons">
+                        <!-- <button class="edit-btn"
+                          >Edit</button>
+                        <button class="save-btn" *ngIf=""
+                          >Save</button> -->
+                        <button class="delete-btn"
+                          >Delete</button>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <button class="button cancel-button" (click)="toggleCategoryPopup()">
+                    Cancel
+                  </button>
+                </div>
               </div>
 
               <label>Amount:</label>
