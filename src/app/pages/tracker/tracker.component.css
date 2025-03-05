@@ -158,7 +158,22 @@ p {
     margin-bottom: 10px;
 }
 
-.button {
+p {
+    padding: 5px 10px;
+    margin-top: 10px;
+    border: 3px solid #000000;
+    box-shadow: 3px 3px 0 #000000;
+    font-weight: 750;
+    background: #ffffff;
+    color: black;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .button {
     padding: 5px 10px;
     margin-top: 10px;
     border: 3px solid #000000;
@@ -170,7 +185,7 @@ p {
     display: block;
     width: 100%;
     text-align: center;
-}
+  }
 
 .button:hover {
     translate: 1.5px 1.5px;
@@ -308,6 +323,49 @@ p {
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     border: 3px solid #000;
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: center;  
+    align-items: center; 
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 #000;
+    border: 3px solid #000;
+    width: 90%;
+    margin: 10px auto;
+}
+
+.week-nav-button {
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
+    padding: 4px 8px;
+    border: 3px solid #000;
+    background: #0c3a9a;
+    color: white;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #000;
+    transition: all 0.2s ease-in-out;
+    min-width: 30px; 
+}
+
+.week-nav-button:hover {
+    background: #444;
+}
+
+.week-nav-button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
+.week-label {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
 }
 
 @media screen and (max-width: 376px) {

@@ -19,8 +19,20 @@
             !showAIExpertiseOverview
           "
         >
-          <!-- Tabs for weekdays -->
-          <div class="tabs">
+        <!-- Week Navigation Container -->
+        <div class="week-navigation">
+          <!-- Previous Week Button -->
+          <button class="week-nav-button" (click)="goToPreviousWeek()">←</button>
+        
+          <!-- Week Text -->
+          <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
+        
+          <!-- Next Week Button -->
+          <button class="week-nav-button" (click)="goToNextWeek()" [disabled]="isCurrentWeek()">→</button>
+        </div>
+        
+        <!-- Tabs for weekdays -->       
+         <div class="tabs">
             <button
               *ngFor="let day of week"
               class="tab-button"
@@ -189,13 +201,10 @@
         <!-- here goes analysis -->
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
-          <div class="pie-chart-container">
           <app-pie
             [categoryTotals]="getWeeklyCategoryTotals()"
             [weeklyTotal]="getWeeklyTotal()"
           ></app-pie>
-          </div>
-          
           <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
@@ -221,14 +230,10 @@
   </div>
 </div>
 
-<p>Week:{{ getFormattedWeekRange() }}</p>
 
-            <!-- Previous Week Button -->
-            <button (click)="goToPreviousWeek()">← Previous</button>
-            <!-- Next Week Button -->
-            <button (click)="goToNextWeek()" [disabled]="isCurrentWeek()">
-              Next →
-            </button>
+
+           
+          
 
 
 <app-chatbot></app-chatbot>
