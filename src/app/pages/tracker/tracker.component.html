@@ -19,8 +19,20 @@
             !showAIExpertiseOverview
           "
         >
-          <!-- Tabs for weekdays -->
-          <div class="tabs">
+        <!-- Week Navigation Container -->
+        <div class="week-navigation">
+          <!-- Previous Week Button -->
+          <button class="week-nav-button" (click)="goToPreviousWeek()">←</button>
+        
+          <!-- Week Text -->
+          <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
+        
+          <!-- Next Week Button -->
+          <button class="week-nav-button" (click)="goToNextWeek()" [disabled]="isCurrentWeek()">→</button>
+        </div>
+        
+        <!-- Tabs for weekdays -->       
+         <div class="tabs">
             <button
               *ngFor="let day of week"
               class="tab-button"
@@ -47,11 +59,11 @@
             <input
               placeholder="Upload Receipt"
               (change)="onFileSelected($event)"
-              class="button"
+              class="upload-button"
               type="file"
               accept="image/*"
             />
-            <button class="button" (click)="processImage()">
+            <button class="extract-button" (click)="processImage()">
               Extract Expenses
             </button>
           </div>
@@ -218,14 +230,10 @@
   </div>
 </div>
 
-<p>Week:{{ getFormattedWeekRange() }}</p>
 
-            <!-- Previous Week Button -->
-            <button (click)="goToPreviousWeek()">← Previous</button>
-            <!-- Next Week Button -->
-            <button (click)="goToNextWeek()" [disabled]="isCurrentWeek()">
-              Next →
-            </button>
+
+           
+          
 
 
 <app-chatbot></app-chatbot>
