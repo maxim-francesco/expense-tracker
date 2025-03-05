@@ -45,6 +45,9 @@ interface DaySpending {
   styleUrls: ['./tracker.component.css'],
 })
 export class TrackerComponent implements OnInit {
+
+  categories: _Category[] = [];
+
   //Services---------------------------------------------------------
   constructor(
     private authService: AuthService,
@@ -63,6 +66,7 @@ export class TrackerComponent implements OnInit {
     this.loadTodayExpenses();
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
+    this.loadCategories();
   }
 
   //------------------------------------------------------------------
@@ -172,18 +176,18 @@ export class TrackerComponent implements OnInit {
 
   //UI Expenses--------------------------------------------------------
 
-  categories: Category[] = [
-    'Groceries',
-    'Taxes',
-    'Entertainment',
-    'Education',
-    'Clothing',
-    'Healthcare',
-    'Sports',
-    'Travel',
-    'Gifts',
-    'Miscellaneous',
-  ];
+  // categories: Category[] = [
+  //   'Groceries',
+  //   'Taxes',
+  //   'Entertainment',
+  //   'Education',
+  //   'Clothing',
+  //   'Healthcare',
+  //   'Sports',
+  //   'Travel',
+  //   'Gifts',
+  //   'Miscellaneous',
+  // ];
 
   selectedDay: { date: string; dayName: string } | undefined = undefined;
 
@@ -521,11 +525,59 @@ export class TrackerComponent implements OnInit {
   expendedDayExpenses: Expense2[] = [];
 
   newCategory = '';
-  newCategoryObj: _Category = {name: this.newCategory};
+
+  editingCategory: string | undefined = undefined;
+  editedCategory: string = '';
+
+  loadCategories() {
+    const userId = this.authService.getId();
+  if (!userId) {
+    console.error('No user ID found');
+    return;
+  }
+
+  this.categoryCrudService.getCategoriesForUser(userId)
+    .subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        // console.log(this.categories);
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      },
+      complete: () => {}
+    });
+  }
 
   toggleCategoryPopup() {
     this.showCategoryPopup = !this.showCategoryPopup;
     this.newCategory = '';
+  }
+
+  addCategory() {
+    this.categoryCrudService.addCategory(this.newCategory, this.authService.getId()!).subscribe((response) => {});
+    this.newCategory = '';
+    this.loadCategories();
+  }
+
+  deleteCategory(categoryId: string) {
+    this.categoryCrudService.deleteCategory(categoryId, this.authService.getId()!);
+    this.loadCategories();
+  }
+
+  editCategory(category: _Category) {
+    this.editingCategory = category.id;
+    this.editedCategory = category.name;
+  }
+
+  saveEditedCategory(category: _Category) {
+    // console.log("CATEGORY ID TO UPDATE = ", category.id, "CATEGORY NAME TO UPDATE = ", category.name);
+    // console.log(this.editedCategory);
+    category.name = this.editedCategory;
+    // console.log(category.name);
+    this.categoryCrudService.updateCategory(category, this.authService.getId()!);
+    this.editingCategory = undefined;
+    this.loadCategories();
   }
 
   toggleExpenseForm() {
@@ -567,10 +619,5 @@ export class TrackerComponent implements OnInit {
         });
       this.cdr.detectChanges();
     }
-  }
-
-  addCategory() {
-    this.newCategoryObj.name = this.newCategory;
-    this.categoryCrudService.addCategory(this.newCategoryObj).subscribe((response) => {});
   }
 }

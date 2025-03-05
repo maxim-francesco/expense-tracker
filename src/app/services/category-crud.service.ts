@@ -9,7 +9,7 @@ import {
   child,
   push,
 } from '@angular/fire/database';
-import { from, map, Observable } from 'rxjs';
+import { catchError, from, map, Observable, of, throwError } from 'rxjs';
 
 export interface _Category {
   id?: string;
@@ -21,24 +21,18 @@ export interface _Category {
 })
 export class CategoryCrudService {
 
-  private basePath = '/categories';
+  private basePath = '';
 
   constructor(private db: Database) {}
 
-  addCategory(category: _Category): Observable<void> {
-    const categoryRef = push(ref(this.db, this.basePath));
-    const categoryWithId = { ...category, id: categoryRef.key };
-    return from(set(categoryRef, categoryWithId));
-  }
-
-  // getExpensesForUser(userId: string): Observable<_Category[]> {
-  //   const userExpensesRef = ref(this.db, `${this.basePath}`);
-  //   return from(get(userExpensesRef)).pipe(
+  // getCategoriesForUser(_userId: string): Observable<_Category[]> {
+  //   const basePath = 'users/' + _userId + '/categories';
+  //   const userCatRef = ref(this.db, basePath);
+  //   return from(get(userCatRef)).pipe(
   //     map((snapshot) => {
   //       if (snapshot.exists()) {
   //         const data = snapshot.val();
-  //         const expenses = Object.values(data) as _Category[];
-  //         return expenses.filter((expense) => expense.userId === userId);
+  //         return Object.values(data) as _Category[];
   //       } else {
   //         return [];
   //       }
@@ -46,16 +40,66 @@ export class CategoryCrudService {
   //   );
   // }
 
-  updateCategory(category: _Category): Observable<void> {
+  getCategoriesForUser(_userId: string): Observable<_Category[]> {
+    const basePath = 'users/' + _userId + '/categories';
+    const userCatRef = ref(this.db, basePath);
+    return from(get(userCatRef)).pipe(
+      map((snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          if (data && typeof data === 'object') {
+            const categories = Object.keys(data).map(key => {
+              const category = data[key];
+              // console.log(`Category key: ${key}, value:`, category);
+              return {
+                id: key,
+                name: category
+              } as _Category;
+            });
+
+            // console.log('Processed categories:', categories);
+            return categories;
+          }
+          return [];
+        } else {
+          return [];
+        }
+      }),
+      catchError(error => {
+        console.error('Error fetching categories:', error);
+        return of([]);
+      })
+    );
+  }
+
+
+  addCategory(category: string, _userId: string): Observable<void> {
+    const basePath = 'users/' + _userId + '/categories';
+    const categoryRef = push(ref(this.db, basePath));
+    return from(set(categoryRef, category));
+  }
+
+  updateCategory(category: _Category, _userId: string): Observable<void> {
     if (!category.id) {
       throw new Error('Category must have an id');
     }
-    const categoryRef = ref(this.db, `${this.basePath}${category.id}`);
-    return from(update(categoryRef, category));
+    const basePath = 'users/' + _userId + '/categories/';
+    const categoryRef = ref(this.db, `${basePath}${category.id}`);
+
+    const updateData = { name: category.name };
+
+    return from(update(categoryRef, updateData)).pipe(
+      catchError(error => {
+        console.error('Update failed:', error);
+        return throwError(() => new Error('Category update failed'));
+      })
+    );
   }
 
-  deleteCategory(categoryId: string): Observable<void> {
-    const categoryRef = ref(this.db, `${this.basePath}${categoryId}`);
+  deleteCategory(categoryId: string, _userId: string): Observable<void> {
+    const basePath = 'users/' + _userId + '/categories/';
+    const categoryRef = ref(this.db, `${basePath}${categoryId}`);
     return from(remove(categoryRef));
   }
 }
