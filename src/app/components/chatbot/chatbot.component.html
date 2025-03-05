@@ -1,5 +1,5 @@
 <div class="chatbot-container" [class.open]="isOpen">
-  <div class="chat-header" (click)="toggleChat()">💬 Chatbot</div>
+  <div class="chat-header" (click)="toggleChat()"> Chat with us</div>
 
   <div class="chat-body" *ngIf="isOpen">
     <div class="messages">
@@ -12,10 +12,10 @@
       <input
         type="text"
         [(ngModel)]="userInput"
-        placeholder="Scrie un mesaj..."
+        placeholder="Type a message..."
       />
       <button (click)="sendMessage()" [disabled]="isLoading">
-        {{ isLoading ? "Se trimite..." : "Trimite" }}
+        {{ isLoading ? "Sending..." : "Send" }}
       </button>
     </div>
   </div>
