@@ -218,4 +218,14 @@
   </div>
 </div>
 
+<p>Week:{{ getFormattedWeekRange() }}</p>
+
+            <!-- Previous Week Button -->
+            <button (click)="goToPreviousWeek()">← Previous</button>
+            <!-- Next Week Button -->
+            <button (click)="goToNextWeek()" [disabled]="isCurrentWeek()">
+              Next →
+            </button>
+
+
 <app-chatbot></app-chatbot>
