@@ -189,10 +189,13 @@
         <!-- here goes analysis -->
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
+          <div class="pie-chart-container">
           <app-pie
             [categoryTotals]="getWeeklyCategoryTotals()"
             [weeklyTotal]="getWeeklyTotal()"
           ></app-pie>
+          </div>
+          
           <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
