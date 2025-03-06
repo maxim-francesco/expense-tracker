@@ -11,10 +11,12 @@ export class SpinnerService{
     loading$ = this.loadingSubject.asObservable()
 
     showSpinner(){
+        console.log('showSpinner');
         this.loadingSubject.next(true);
     }
 
     hideSpinner(){
+        console.log('hideSpinner');
         this.loadingSubject.next(false);
     }
 
