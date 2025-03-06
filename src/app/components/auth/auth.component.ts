@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 
 @Component({
   selector: 'app-auth',
@@ -20,9 +21,36 @@ export class AuthComponent {
   isResetting = false;
   resetMessage: string = '';
 
+  // categories: _Category[] = [
+  //   {name: 'Groceries'},
+  //   {name: 'Taxes'},
+  //   {name: 'Entertainment'},
+  //   {name: 'Education'},
+  //   {name: 'Clothing'},
+  //   {name: 'Healthcare'},
+  //   {name: 'Sports'},
+  //   {name: 'Travel'},
+  //   {name: 'Gifts'},
+  //   {name: 'Miscellaneous'},
+  // ];
+
+  categories: string[] = [
+    'Groceries',
+    'Taxes',
+    'Entertainment',
+    'Education',
+    'Clothing',
+    'Healthcare',
+    'Sports',
+    'Travel',
+    'Gifts',
+    'Miscellaneous',
+  ];
+
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private catService: CategoryCrudService
   ) { }
 
   ngOnInit() {
@@ -68,6 +96,8 @@ export class AuthComponent {
       this.authService.signup(this.email, this.password).subscribe({
         next: response => {
           console.log('User registered', response);
+          console.log("USER ID = ", response.localId);
+          this.loadCategoriesToNewUser(response.localId);
           this.isRegistering = false;
           this.resetMessage = "Account created! Please log in.";
         }
@@ -82,6 +112,13 @@ export class AuthComponent {
     }
 
     form.reset();
+  }
+
+  loadCategoriesToNewUser(userId: string) {
+    this.categories.forEach(category => {
+      this.catService.addCategory(category, userId).subscribe((response) => {});
+    });
+    console.log("CATEGORIES LOADED TO USER: ", userId);
   }
 
   resetPassword() {

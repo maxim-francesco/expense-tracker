@@ -28,6 +28,7 @@ import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
 import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
+import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 
 interface DaySpending {
   date: string;
@@ -45,6 +46,11 @@ interface DaySpending {
   styleUrls: ['./tracker.component.css'],
 })
 export class TrackerComponent implements OnInit {
+
+  categories: _Category[] = [];
+  filteredCategories: _Category[] = [];
+
+
   //Services---------------------------------------------------------
   constructor(
     private authService: AuthService,
@@ -55,15 +61,17 @@ export class TrackerComponent implements OnInit {
     private excelService: ExcelService,
     private ocrService: OcrService,
     private geminiService: GeminiService,
-    private expensesCrudService: ExpensesCrudService
-  ) { }
+    private expensesCrudService: ExpensesCrudService,
+    private categoryCrudService: CategoryCrudService,
+  ) {}
+
 
   ngOnInit() {
     this.loadTodayExpenses();
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
-
-
+    this.loadCategories();
+    this.filteredCategories = [...this.categories];
     const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
     this.currentWeekStart = startDate.toISOString().split('T')[0];
     this.currentWeekEnd = endDate.toISOString().split('T')[0];
@@ -176,18 +184,18 @@ export class TrackerComponent implements OnInit {
 
   //UI Expenses--------------------------------------------------------
 
-  categories: Category[] = [
-    'Groceries',
-    'Taxes',
-    'Entertainment',
-    'Education',
-    'Clothing',
-    'Healthcare',
-    'Sports',
-    'Travel',
-    'Gifts',
-    'Miscellaneous',
-  ];
+  // categories: Category[] = [
+  //   'Groceries',
+  //   'Taxes',
+  //   'Entertainment',
+  //   'Education',
+  //   'Clothing',
+  //   'Healthcare',
+  //   'Sports',
+  //   'Travel',
+  //   'Gifts',
+  //   'Miscellaneous',
+  // ];
 
   selectedDay: { date: string; dayName: string } | undefined = undefined;
 
@@ -531,8 +539,68 @@ export class TrackerComponent implements OnInit {
   expendedDay: { date: string; dayName: string } | null = null;
   expendedDayExpenses: Expense2[] = [];
 
+  newCategory = '';
+
+  editingCategory: string | undefined = undefined;
+  editedCategory: string = '';
+
+  loadCategories() {
+    const userId = this.authService.getId();
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
+
+    this.categoryCrudService.getCategoriesForUser(userId)
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+          this.filteredCategories = categories;
+        },
+        error: (err) => {
+          console.error('Error loading categories:', err);
+        },
+        complete: () => {}
+      });
+  }
+
   toggleCategoryPopup() {
     this.showCategoryPopup = !this.showCategoryPopup;
+    this.newCategory = '';
+    this.filterCategories();
+  }
+
+  addCategory() {
+    this.categoryCrudService.addCategory(this.newCategory, this.authService.getId()!).subscribe((response) => {});
+    this.newCategory = '';
+    this.loadCategories();
+    // this.filterCategories();
+  }
+
+  deleteCategory(categoryId: string) {
+    this.categoryCrudService.deleteCategory(categoryId, this.authService.getId()!);
+    this.loadCategories();
+  }
+
+  editCategory(category: _Category) {
+    this.editingCategory = category.id;
+    this.editedCategory = category.name;
+  }
+
+  saveEditedCategory(categoryId: string) {
+    this.categoryCrudService.updateCategory(this.editedCategory, categoryId, this.authService.getId()!);
+    this.editingCategory = undefined;
+    this.loadCategories();
+  }
+
+  filterCategories() {
+    if (!this.newCategory.trim()) {
+      this.filteredCategories = [...this.categories];
+    } else {
+      this.filteredCategories = this.categories.filter(category =>
+        category.name.toLowerCase().includes(this.newCategory.toLowerCase())
+      );
+    }
   }
 
   toggleExpenseForm() {
@@ -588,7 +656,6 @@ export class TrackerComponent implements OnInit {
     }
     this.cdr.detectChanges();
   }
-
   //Category
 
   // async addCategory() {
@@ -699,6 +766,5 @@ export class TrackerComponent implements OnInit {
 
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   }
-
 
 }
