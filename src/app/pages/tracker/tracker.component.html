@@ -16,13 +16,28 @@
             !showWeeklyOverview &&
             !showAnalysisOverview &&
             !showAIExpertiseOverview
-          ">
-          <!-- Tabs for weekdays -->
-          <div class="tabs">
-            <button *ngFor="let day of week"
-                    class="tab-button"
-                    [class.active]="selectedDay === day"
-                    (click)="
+
+          "
+        >
+        <!-- Week Navigation Container -->
+        <div class="week-navigation">
+          <!-- Previous Week Button -->
+          <button class="week-nav-button" (click)="goToPreviousWeek()">←</button>
+        
+          <!-- Week Text -->
+          <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
+        
+          <!-- Next Week Button -->
+          <button class="week-nav-button" (click)="goToNextWeek()" [disabled]="isCurrentWeek()">→</button>
+        </div>
+        
+        <!-- Tabs for weekdays -->       
+         <div class="tabs">
+            <button
+              *ngFor="let day of week"
+              class="tab-button"
+              [class.active]="selectedDay === day"
+              (click)="
                 selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)
               "
                     [disabled]="isDateInFutureOrPast(day.date)">
@@ -43,11 +58,15 @@
           </div>
 
           <div class="upload-receipt">
-            <input placeholder="Upload Receipt"
-                   (change)="onFileSelected($event)"
-                   class="button" type="file"
-                   accept="image/*" />
-            <button class="button" (click)="processImage()">
+
+            <input
+              placeholder="Upload Receipt"
+              (change)="onFileSelected($event)"
+              class="upload-button"
+              type="file"
+              accept="image/*"
+            />
+            <button class="extract-button" (click)="processImage()">
               Extract Expenses
             </button>
           </div>
@@ -179,12 +198,14 @@
                 (click)="toggleDayExpenses(day)"
                 class="clickable-day">
               {{ day.dayName }}: {{ day.total }}€
-              <div *ngIf="expendedDay === day"
-                   class="expense-list">
+
+              <div *ngIf="day.isExpanded" class="expense-list">
                 <h4>Expenses for {{ day.dayName }}</h4>
-                <div *ngIf="expendedDayExpenses.length > 0">
-                  <div class="expense-item"
-                       *ngFor="let _expense of expendedDayExpenses">
+                <div *ngIf="day.expenses && day.expenses.length > 0">
+                  <div
+                    class="expense-item"
+                    *ngFor="let _expense of day.expenses"
+                  >
                     <div class="expense-info">
                       <span class="expense-name">{{
                         _expense.name }}</span>
@@ -196,7 +217,7 @@
                       _expense.amount }} €</div>
                   </div>
                 </div>
-                <p *ngIf="expendedDayExpenses.length === 0">
+                <p *ngIf="day.expenses.length === 0">
                   No expenses recorded for {{ day.dayName }}
                 </p>
               </div>
@@ -244,5 +265,11 @@
     </div>
   </div>
 </div>
+
+
+
+           
+          
+
 
 <app-chatbot></app-chatbot>
