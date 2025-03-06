@@ -28,6 +28,9 @@ import { ChatbotComponent } from '../../components/chatbot/chatbot.component';
 import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
+import { SpinnerService } from '../../services/spinner.service';
+import { LoadingSpinnerComponent } from "../../components/loading-spinner/loading-spinner.component";
+import { finalize } from 'rxjs';
 
 interface DaySpending {
   date: string;
@@ -40,7 +43,7 @@ interface DaySpending {
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent],
+  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent, LoadingSpinnerComponent],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })
@@ -55,10 +58,13 @@ export class TrackerComponent implements OnInit {
     private excelService: ExcelService,
     private ocrService: OcrService,
     private geminiService: GeminiService,
-    private expensesCrudService: ExpensesCrudService
+    private expensesCrudService: ExpensesCrudService,
+    private spinnerService: SpinnerService
   ) { }
 
   ngOnInit() {
+    this.spinnerService.showSpinner();
+
     this.loadTodayExpenses();
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
@@ -67,6 +73,7 @@ export class TrackerComponent implements OnInit {
     const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
     this.currentWeekStart = startDate.toISOString().split('T')[0];
     this.currentWeekEnd = endDate.toISOString().split('T')[0];
+
   }
 
   //------------------------------------------------------------------
@@ -110,16 +117,19 @@ export class TrackerComponent implements OnInit {
   processImage(): void {
     if (!this.selectedFile) return;
 
+    this.spinnerService.showSpinner();
+
     const reader = new FileReader();
     reader.onload = () => {
       const base64Image = (reader.result as string).split(',')[1];
-      this.ocrService.extractText(base64Image).subscribe((response) => {
-        if (response.responses && response.responses.length > 0) {
-          this.extractedText =
-            response.responses[0].fullTextAnnotation?.text || '';
-          this.scanReceiptAndExtractExpenses(this.extractedText);
-        }
-      });
+      this.ocrService.extractText(base64Image)
+        .pipe(finalize(() => this.spinnerService.hideSpinner()))
+        .subscribe((response) => {
+          if (response.responses && response.responses.length > 0) {
+            this.extractedText = response.responses[0].fullTextAnnotation?.text || '';
+            this.scanReceiptAndExtractExpenses(this.extractedText);
+          }
+        });
     };
     reader.readAsDataURL(this.selectedFile);
   }
@@ -128,23 +138,21 @@ export class TrackerComponent implements OnInit {
     const userId = this.authService.getId()!;
     const today = new Date().toISOString().split('T')[0];
 
-    this.geminiService.extractExpenses(ocrText).subscribe((response) => {
-      let rawText = response.candidates[0]?.content?.parts[0]?.text || '[]';
+    this.spinnerService.showSpinner();
 
-      const cleanedText = rawText
-        .replace(/^```json\s*/, '')
-        .replace(/```$/, '');
-
-      const extractedExpenses = JSON.parse(cleanedText);
-
-      this.extractedExpenses = extractedExpenses.map((expense: any) => ({
-        ...expense,
-        date: today,
-        userId: userId,
-      }));
-
-      this.addExtractedExpensesToDatabase(this.extractedExpenses);
-    });
+    this.geminiService.extractExpenses(ocrText)
+      .pipe(finalize(() => this.spinnerService.hideSpinner()))
+      .subscribe((response) => {
+        let rawText = response.candidates[0]?.content?.parts[0]?.text || '[]';
+        const cleanedText = rawText.replace(/^```json\s*/, '').replace(/```$/, '');
+        const extractedExpenses = JSON.parse(cleanedText);
+        this.extractedExpenses = extractedExpenses.map((expense: any) => ({
+          ...expense,
+          date: today,
+          userId: userId,
+        }));
+        this.addExtractedExpensesToDatabase(this.extractedExpenses);
+      });
   }
 
   addExtractedExpensesToDatabase(expenses: Expense2[]) {
@@ -162,8 +170,10 @@ export class TrackerComponent implements OnInit {
   sendWeeklyExpensesToGemini(): void {
     const allExpenses = this.weeklySpending.flatMap((day) => day.expenses);
 
+    this.spinnerService.showSpinner();
+
     this.geminiService
-      .analyzeWeeklyExpenses(allExpenses)
+      .analyzeWeeklyExpenses(allExpenses).pipe(finalize(() => this.spinnerService.hideSpinner()))
       .subscribe((response) => {
         const analysis = response.candidates[0]?.content?.parts[0]?.text;
         console.log('Gemini Analysis:', analysis);
@@ -325,8 +335,10 @@ export class TrackerComponent implements OnInit {
   }
 
   loadExpensesForUserOnDate(date: string) {
+    this.spinnerService.showSpinner();
     this.expensesCrudService
       .loadExpensesForUserOnDate(this.authService.getId()!, date)
+      .pipe(finalize(() => this.spinnerService.hideSpinner()))
       .subscribe((expenses) => {
         this.expenses2 = expenses;
       });
@@ -335,8 +347,10 @@ export class TrackerComponent implements OnInit {
   weeklySpending: DaySpending[] = [];
 
   loadExpensesForWeek(week: { date: string; dayName: string }[]): void {
+    this.spinnerService.showSpinner();
     this.expensesCrudService
       .getExpensesForUser(this.authService.getId()!)
+      .pipe(finalize(() => this.spinnerService.hideSpinner()))
       .subscribe((expenses) => {
         this.expenses2 = [];
         this.weeklySpending = week.map((day) => {
@@ -353,12 +367,11 @@ export class TrackerComponent implements OnInit {
             dayName: day.dayName,
             expenses: expensesForDay,
             total: total,
-            isExpanded: true
+            isExpanded: true,
           };
         });
 
         this.selectedDay = this.week[0];
-
         this.loadExpensesForUserOnDate(this.selectedDay.date);
       });
   }
@@ -414,7 +427,8 @@ export class TrackerComponent implements OnInit {
   updateExpense2(): void {
     const updatedExpense = this.updatedItem();
     this.resetSavingForm();
-    this.expensesCrudService.updateExpense(updatedExpense).subscribe(() => {
+    this.spinnerService.showSpinner();
+    this.expensesCrudService.updateExpense(updatedExpense).pipe(finalize(() => this.spinnerService.hideSpinner())).subscribe(() => {
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
     });
   }
@@ -429,7 +443,7 @@ export class TrackerComponent implements OnInit {
 
   private delete(expense: Expense2) {
     if (expense.id) {
-      this.expensesCrudService.deleteExpense(expense.id).subscribe(() => {
+      this.expensesCrudService.deleteExpense(expense.id).pipe(finalize(() => this.spinnerService.hideSpinner())).subscribe(() => {
         this.loadExpensesForUserOnDate(this.selectedDay!.date);
       });
     }
@@ -437,6 +451,7 @@ export class TrackerComponent implements OnInit {
 
   deleteExpense2(expense: Expense2): void {
     this.verifyDeletion().subscribe(() => {
+      this.spinnerService.showSpinner();
       this.delete(expense);
     });
   }

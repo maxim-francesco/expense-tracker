@@ -1,47 +1,42 @@
 <div class="background-container">
+
+  <app-loading-spinner />
+
   <div class="overlay">
     <div class="card">
       <div class="head">
         {{
-          showWeeklyOverview
-            ? "Weekly Overview"
-            : showExpenseForm
-            ? "Add Expense"
-            : "Expense Tracker"
+        showWeeklyOverview
+        ? "Weekly Overview"
+        : showExpenseForm
+        ? "Add Expense"
+        : "Expense Tracker"
         }}
       </div>
 
       <div class="content">
-        <ng-container
-          *ngIf="
+        <ng-container *ngIf="
             !showWeeklyOverview &&
             !showAnalysisOverview &&
             !showAIExpertiseOverview
-          "
-        >
-        <!-- Week Navigation Container -->
-        <div class="week-navigation">
-          <!-- Previous Week Button -->
-          <button class="week-nav-button" (click)="goToPreviousWeek()">←</button>
-        
-          <!-- Week Text -->
-          <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
-        
-          <!-- Next Week Button -->
-          <button class="week-nav-button" (click)="goToNextWeek()" [disabled]="isCurrentWeek()">→</button>
-        </div>
-        
-        <!-- Tabs for weekdays -->       
-         <div class="tabs">
-            <button
-              *ngFor="let day of week"
-              class="tab-button"
-              [class.active]="selectedDay === day"
-              (click)="
+          ">
+          <!-- Week Navigation Container -->
+          <div class="week-navigation">
+            <!-- Previous Week Button -->
+            <button class="week-nav-button" (click)="goToPreviousWeek()">←</button>
+
+            <!-- Week Text -->
+            <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
+
+            <!-- Next Week Button -->
+            <button class="week-nav-button" (click)="goToNextWeek()" [disabled]="isCurrentWeek()">→</button>
+          </div>
+
+          <!-- Tabs for weekdays -->
+          <div class="tabs">
+            <button *ngFor="let day of week" class="tab-button" [class.active]="selectedDay === day" (click)="
                 selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)
-              "
-              [disabled]="isDateInFutureOrPast(day.date)"
-            >
+              " [disabled]="isDateInFutureOrPast(day.date)">
               {{ day.dayName }}
             </button>
           </div>
@@ -56,13 +51,8 @@
           </div>
 
           <div class="upload-receipt">
-            <input
-              placeholder="Upload Receipt"
-              (change)="onFileSelected($event)"
-              class="upload-button"
-              type="file"
-              accept="image/*"
-            />
+            <input placeholder="Upload Receipt" (change)="onFileSelected($event)" class="upload-button" type="file"
+              accept="image/*" />
             <button class="extract-button" (click)="processImage()">
               Extract Expenses
             </button>
@@ -74,61 +64,36 @@
               <h3>Expenses for {{ selectedDay!.dayName }}</h3>
 
               <label>Expense Name:</label>
-              <input
-                #expName
-                [(ngModel)]="expenseName"
-                (change)="
+              <input #expName [(ngModel)]="expenseName" (change)="
                   isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                "
-                type="text"
-                placeholder="Enter expense name"
-              />
+                " type="text" placeholder="Enter expense name" />
 
               <label>Add or select category </label>
               <div class="category-container">
-                <select
-                  #expCategory
-                  [(ngModel)]="selectedCategory"
-                  (change)="
+                <select #expCategory [(ngModel)]="selectedCategory" (change)="
                     isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                  "
-                  required
-                >
+                  " required>
                   <option value="" disabled selected>Select Category</option>
-                  <option
-                    *ngFor="let category of categories"
-                    [value]="category"
-                  >
+                  <option *ngFor="let category of categories" [value]="category">
                     {{ category }}
                   </option>
                 </select>
               </div>
 
               <label>Amount:</label>
-              <input
-                #expAmount
-                [(ngModel)]="expenseAmount"
-                type="number"
-                (change)="
+              <input #expAmount [(ngModel)]="expenseAmount" type="number" (change)="
                   isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                "
-                placeholder="Enter an amount"
-                (input)="validateAmount($event)"
-                (keypress)="onKeyPress($event)"
-                step="0.01"
-                min="0.01"
-              />
+                " placeholder="Enter an amount" (input)="validateAmount($event)" (keypress)="onKeyPress($event)"
+                step="0.01" min="0.01" />
             </div>
           </ng-container>
 
           <!-- Expense List -->
-          <ng-container
-            *ngIf="
+          <ng-container *ngIf="
               !showExpenseForm &&
               !showAnalysisOverview &&
               !showAIExpertiseOverview
-            "
-          >
+            ">
             <div class="expense-list">
               <h4>Existing Expenses</h4>
               <div class="expense-item" *ngFor="let _expense of expenses2">
@@ -149,12 +114,8 @@
             </div>
           </ng-container>
 
-          <button
-            [disabled]="isSaveDisabled"
-            class="weekly-overview-button"
-            *ngIf="showExpenseForm"
-            (click)="isEditing ? updateExpense2() : addExpenseFromForm()"
-          >
+          <button [disabled]="isSaveDisabled" class="weekly-overview-button" *ngIf="showExpenseForm"
+            (click)="isEditing ? updateExpense2() : addExpenseFromForm()">
             {{ isEditing ? "Update" : "Save" }}
           </button>
         </ng-container>
@@ -162,24 +123,17 @@
         <ng-container *ngIf="showWeeklyOverview">
           <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}$</h2>
           <ul class="week-summary">
-            <li
-              *ngFor="let day of weeklySpending"
-              (click)="toggleDayExpenses(day)"
-              class="clickable-day"
-            >
+            <li *ngFor="let day of weeklySpending" (click)="toggleDayExpenses(day)" class="clickable-day">
               {{ day.dayName }}: {{ day.total }}€
               <div *ngIf="day.isExpanded" class="expense-list">
                 <h4>Expenses for {{ day.dayName }}</h4>
                 <div *ngIf="day.expenses && day.expenses.length > 0">
-                  <div
-                    class="expense-item"
-                    *ngFor="let _expense of day.expenses"
-                  >
+                  <div class="expense-item" *ngFor="let _expense of day.expenses">
                     <div class="expense-info">
                       <span class="expense-name">{{ _expense.name }}</span>
                       <span class="expense-category">{{
                         _expense.category
-                      }}</span>
+                        }}</span>
                     </div>
                     <div class="expense-amount">{{ _expense.amount }} €</div>
                   </div>
@@ -201,10 +155,7 @@
         <!-- here goes analysis -->
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
-          <app-pie
-            [categoryTotals]="getWeeklyCategoryTotals()"
-            [weeklyTotal]="getWeeklyTotal()"
-          ></app-pie>
+          <app-pie [categoryTotals]="getWeeklyCategoryTotals()" [weeklyTotal]="getWeeklyTotal()"></app-pie>
           <button class="button" (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
@@ -232,8 +183,8 @@
 
 
 
-           
-          
+
+
 
 
 <app-chatbot></app-chatbot>
