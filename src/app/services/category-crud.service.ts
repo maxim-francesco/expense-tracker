@@ -8,6 +8,7 @@ import {
   update,
   child,
   push,
+  databaseInstance$,
 } from '@angular/fire/database';
 import { catchError, from, map, Observable, of, throwError } from 'rxjs';
 
@@ -73,23 +74,20 @@ export class CategoryCrudService {
     );
   }
 
-
   addCategory(category: string, _userId: string): Observable<void> {
     const basePath = 'users/' + _userId + '/categories';
     const categoryRef = push(ref(this.db, basePath));
     return from(set(categoryRef, category));
   }
 
-  updateCategory(category: _Category, _userId: string): Observable<void> {
-    if (!category.id) {
+  updateCategory(categoryName: string, categoryId: string, _userId: string): Observable<void> {
+    if (!categoryId) {
       throw new Error('Category must have an id');
     }
     const basePath = 'users/' + _userId + '/categories/';
-    const categoryRef = ref(this.db, `${basePath}${category.id}`);
-
-    const updateData = { name: category.name };
-
-    return from(update(categoryRef, updateData)).pipe(
+    const updates: {[key: string]: string} = {};
+    updates[`${basePath}${categoryId}`] = categoryName;
+    return from(update(ref(this.db), updates)).pipe(
       catchError(error => {
         console.error('Update failed:', error);
         return throwError(() => new Error('Category update failed'));

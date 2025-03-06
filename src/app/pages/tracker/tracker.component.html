@@ -90,12 +90,13 @@
                   <h3>Manage Categories</h3>
                   <input type="text"
                          [(ngModel)]="newCategory"
-                         placeholder="Enter new category" />
+                         placeholder="Enter new category"
+                         (input)="filterCategories()" />
                   <button class="button"
                           (click)="addCategory()">Add</button>
 
                   <ul class="category-list">
-                    <li *ngFor="let category of categories">
+                    <li *ngFor="let category of filteredCategories">
                       <span>{{ category.name }}</span>
 
                       <input *ngIf="editingCategory === category.id" type="text" [(ngModel)]="editedCategory" />
@@ -106,7 +107,7 @@
                                 (click)="editCategory(category)">Edit</button>
                         <button class="save-btn"
                                 *ngIf="editingCategory === category.id"
-                                (click)="saveEditedCategory(category)">Save</button>
+                                (click)="saveEditedCategory(category.id!)">Save</button>
                         <button class="delete-btn"
                                 (click)="deleteCategory(category.id!)">Delete</button>
                       </div>

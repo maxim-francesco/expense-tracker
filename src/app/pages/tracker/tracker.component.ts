@@ -47,6 +47,8 @@ interface DaySpending {
 export class TrackerComponent implements OnInit {
 
   categories: _Category[] = [];
+  filteredCategories: _Category[] = [];
+
 
   //Services---------------------------------------------------------
   constructor(
@@ -67,6 +69,7 @@ export class TrackerComponent implements OnInit {
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
     this.loadCategories();
+    this.filteredCategories = [...this.categories];
   }
 
   //------------------------------------------------------------------
@@ -531,33 +534,35 @@ export class TrackerComponent implements OnInit {
 
   loadCategories() {
     const userId = this.authService.getId();
-  if (!userId) {
-    console.error('No user ID found');
-    return;
-  }
+    if (!userId) {
+      console.error('No user ID found');
+      return;
+    }
 
-  this.categoryCrudService.getCategoriesForUser(userId)
-    .subscribe({
-      next: (categories) => {
-        this.categories = categories;
-        // console.log(this.categories);
-      },
-      error: (err) => {
-        console.error('Error loading categories:', err);
-      },
-      complete: () => {}
-    });
+    this.categoryCrudService.getCategoriesForUser(userId)
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+          this.filteredCategories = categories;
+        },
+        error: (err) => {
+          console.error('Error loading categories:', err);
+        },
+        complete: () => {}
+      });
   }
 
   toggleCategoryPopup() {
     this.showCategoryPopup = !this.showCategoryPopup;
     this.newCategory = '';
+    this.filterCategories();
   }
 
   addCategory() {
     this.categoryCrudService.addCategory(this.newCategory, this.authService.getId()!).subscribe((response) => {});
     this.newCategory = '';
     this.loadCategories();
+    // this.filterCategories();
   }
 
   deleteCategory(categoryId: string) {
@@ -570,14 +575,20 @@ export class TrackerComponent implements OnInit {
     this.editedCategory = category.name;
   }
 
-  saveEditedCategory(category: _Category) {
-    // console.log("CATEGORY ID TO UPDATE = ", category.id, "CATEGORY NAME TO UPDATE = ", category.name);
-    // console.log(this.editedCategory);
-    category.name = this.editedCategory;
-    // console.log(category.name);
-    this.categoryCrudService.updateCategory(category, this.authService.getId()!);
+  saveEditedCategory(categoryId: string) {
+    this.categoryCrudService.updateCategory(this.editedCategory, categoryId, this.authService.getId()!);
     this.editingCategory = undefined;
     this.loadCategories();
+  }
+
+  filterCategories() {
+    if (!this.newCategory.trim()) {
+      this.filteredCategories = [...this.categories];
+    } else {
+      this.filteredCategories = this.categories.filter(category =>
+        category.name.toLowerCase().includes(this.newCategory.toLowerCase())
+      );
+    }
   }
 
   toggleExpenseForm() {
