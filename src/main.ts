@@ -19,7 +19,8 @@ const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'track', component: TrackerComponent, canActivate: [AuthGuard] },
   { path: 'about-us', component: AboutusComponent },
-  { path: '**', component: NotFoundComponent }, 
+  { path: '404', component: NotFoundComponent }, 
+  { path: '**', redirectTo: '/404' }
 ];
 
 bootstrapApplication(AppComponent, {
