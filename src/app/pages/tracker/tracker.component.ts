@@ -32,6 +32,7 @@ import { SpinnerService } from '../../services/spinner.service';
 import { LoadingSpinnerComponent } from "../../components/loading-spinner/loading-spinner.component";
 import { finalize } from 'rxjs';
 import { _Category, CategoryCrudService } from '../../services/category-crud.service';
+import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 
 interface DaySpending {
   date: string;
