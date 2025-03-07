@@ -131,7 +131,10 @@ export class TrackerComponent implements OnInit {
   }
 
   processImage(): void {
-    if (!this.selectedFile) return;
+    if (!this.selectedFile) {
+      this.showNotification('Please select a file before extracting!', 'error');
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -140,10 +143,21 @@ export class TrackerComponent implements OnInit {
         if (response.responses && response.responses.length > 0) {
           this.extractedText =
             response.responses[0].fullTextAnnotation?.text || '';
+
+            if (!this.extractedText.trim()) {
+              this.showNotification('No text found in the image!', 'warning');
+              return;
+            }
+
           this.scanReceiptAndExtractExpenses(this.extractedText);
         }
       });
     };
+
+    reader.onerror = () => {
+      this.showNotification('Error reading the image file!', 'error');
+    };
+    
     reader.readAsDataURL(this.selectedFile);
   }
 
