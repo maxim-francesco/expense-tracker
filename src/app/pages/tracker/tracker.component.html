@@ -11,11 +11,6 @@
         : showExpenseForm
         ? "Add Expense"
         : "Expense Tracker"
-        showWeeklyOverview
-        ? "Weekly Overview"
-        : showExpenseForm
-        ? "Add Expense"
-        : "Expense Tracker"
         }}
       </div>
 
@@ -161,11 +156,9 @@
 
           <!-- Expense List -->
           <ng-container *ngIf="
-          <ng-container *ngIf="
               !showExpenseForm &&
               !showAnalysisOverview &&
               !showAIExpertiseOverview
-            ">
             ">
             <div class="expense-list">
               <h4>Existing Expenses</h4>
