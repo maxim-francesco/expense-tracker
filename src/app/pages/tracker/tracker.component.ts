@@ -30,6 +30,7 @@ import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
 import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 import { NotificationComponent } from "../../components/notification/notification.component";
+import { NotificationService } from '../../services/notification.service';
 
 interface DaySpending {
   date: string;
@@ -64,6 +65,7 @@ export class TrackerComponent implements OnInit {
     private geminiService: GeminiService,
     private expensesCrudService: ExpensesCrudService,
     private categoryCrudService: CategoryCrudService,
+    private notificationService: NotificationService
   ) {}
 
 
@@ -78,20 +80,6 @@ export class TrackerComponent implements OnInit {
     this.currentWeekEnd = endDate.toISOString().split('T')[0];
   }
 
-  //Notification------------------------------------------------------
-
-  notificationMessage: string = '';
-  notificationType: 'success' | 'error' | 'warning' = 'success';
-
-  showNotification(message: string, type: 'success' | 'error' | 'warning') {
-    this.notificationMessage = message;
-    this.notificationType = type;
-
-    setTimeout(() => {
-      this.notificationMessage = ''; // auto-hide after 3s
-    }, 3000);
-  }
-  
   //------------------------------------------------------------------
 
   //Excel-------------------------------------------------------------
@@ -132,7 +120,7 @@ export class TrackerComponent implements OnInit {
 
   processImage(): void {
     if (!this.selectedFile) {
-      this.showNotification('Please select a file before extracting!', 'error');
+      this.notificationService.showNotification('Please select a file before extracting!', 'error');
       return;
     }
 
@@ -145,7 +133,7 @@ export class TrackerComponent implements OnInit {
             response.responses[0].fullTextAnnotation?.text || '';
 
             if (!this.extractedText.trim()) {
-              this.showNotification('No text found in the image!', 'warning');
+              this.notificationService.showNotification('No text found in the image!', 'warning');
               return;
             }
 
@@ -155,7 +143,7 @@ export class TrackerComponent implements OnInit {
     };
 
     reader.onerror = () => {
-      this.showNotification('Error reading the image file!', 'error');
+      this.notificationService.showNotification('Error reading the image file!', 'error');
     };
 
     reader.readAsDataURL(this.selectedFile);
@@ -337,7 +325,7 @@ export class TrackerComponent implements OnInit {
 
   addExpenseFromForm(): void {
     if (!this.selectedCategory || !this.expenseName || !this.expenseAmount) {
-      this.showNotification('Please fill out all fields.', 'warning');
+      this.notificationService.showNotification('Please fill out all fields.', 'warning');
       return;
     }
 
@@ -349,7 +337,7 @@ export class TrackerComponent implements OnInit {
 
   addExpense(newExpense: Expense2) {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
-      this.showNotification('Expense added successfully!', 'success');
+      this.notificationService.showNotification('Expense added successfully!', 'success');
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
       
     });
@@ -483,7 +471,7 @@ export class TrackerComponent implements OnInit {
   deleteExpense2(expense: Expense2): void {
     this.verifyDeletion().subscribe(() => {
       this.delete(expense);
-      this.showNotification('Expense deleted successfully!', 'success');
+      this.notificationService.showNotification('Expense deleted successfully!', 'success');
     });
   }
 
@@ -532,7 +520,7 @@ export class TrackerComponent implements OnInit {
     if (numValue <= 0) {
       // this.errorMessage = 'Amount must be greater than 0';
       this.isSaveDisabled = true;
-      this.showNotification('Amount must be greater than 0', 'warning');
+      this.notificationService.showNotification('Amount must be greater than 0', 'warning');
       return;
     }
 
@@ -540,7 +528,7 @@ export class TrackerComponent implements OnInit {
       const parts = value.split('.');
       if (parts[1] && parts[1].length > 2) {
         input.value = numValue.toFixed(2);
-        this.showNotification('Only two decimal places allowed.', 'warning');
+        this.notificationService.showNotification('Only two decimal places allowed.', 'warning');
       }
     }
     this.isSaveDisabled = false;
@@ -556,7 +544,7 @@ export class TrackerComponent implements OnInit {
     this.isSaveDisabled = !isValid;
 
     if (!isValid) {
-      this.showNotification('Please fill out all fields correctly.', 'warning');
+      this.notificationService.showNotification('Please fill out all fields correctly.', 'warning');
     }
   }
 
