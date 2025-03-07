@@ -157,7 +157,7 @@ export class TrackerComponent implements OnInit {
     reader.onerror = () => {
       this.showNotification('Error reading the image file!', 'error');
     };
-    
+
     reader.readAsDataURL(this.selectedFile);
   }
 
@@ -345,12 +345,13 @@ export class TrackerComponent implements OnInit {
     this.resetSavingForm();
     this.addExpense(newExpense);
 
-    this.showNotification('Expense added successfully!', 'success');
   }
 
   addExpense(newExpense: Expense2) {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
+      this.showNotification('Expense added successfully!', 'success');
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
+      
     });
   }
 
@@ -522,6 +523,7 @@ export class TrackerComponent implements OnInit {
     // this.errorMessage = '';
 
     if (!value) {
+      this.isSaveDisabled = true;
       return;
     }
 
@@ -529,6 +531,7 @@ export class TrackerComponent implements OnInit {
 
     if (numValue <= 0) {
       // this.errorMessage = 'Amount must be greater than 0';
+      this.isSaveDisabled = true;
       this.showNotification('Amount must be greater than 0', 'warning');
       return;
     }
@@ -537,17 +540,26 @@ export class TrackerComponent implements OnInit {
       const parts = value.split('.');
       if (parts[1] && parts[1].length > 2) {
         input.value = numValue.toFixed(2);
+        this.showNotification('Only two decimal places allowed.', 'warning');
       }
     }
+    this.isSaveDisabled = false;
   }
 
   validateFormAtSave() {
-    this.isSaveDisabled =
-      !this.selectedCategory ||
-      !this.expenseName ||
-      !this.expenseAmount ||
-      this.expenseAmount <= 0;
+    const isValid =
+      this.selectedCategory &&
+      this.expenseName.trim() !== '' &&
+      this.expenseAmount &&
+      this.expenseAmount > 0;
+
+    this.isSaveDisabled = !isValid;
+
+    if (!isValid) {
+      this.showNotification('Please fill out all fields correctly.', 'warning');
+    }
   }
+
   validateFormAtUpdate() {
     this.isSaveDisabled = false;
   }
