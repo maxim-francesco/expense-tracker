@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { SpinnerService } from '../../services/spinner.service';
 import { LoadingSpinnerComponent } from "../loading-spinner/loading-spinner.component";
 import { finalize } from 'rxjs';
+import { _Category, CategoryCrudService } from '../../services/category-crud.service';
 
 @Component({
   selector: 'app-auth',
@@ -23,10 +24,37 @@ export class AuthComponent {
   isResetting = false;
   resetMessage: string = '';
 
+  // categories: _Category[] = [
+  //   {name: 'Groceries'},
+  //   {name: 'Taxes'},
+  //   {name: 'Entertainment'},
+  //   {name: 'Education'},
+  //   {name: 'Clothing'},
+  //   {name: 'Healthcare'},
+  //   {name: 'Sports'},
+  //   {name: 'Travel'},
+  //   {name: 'Gifts'},
+  //   {name: 'Miscellaneous'},
+  // ];
+
+  categories: string[] = [
+    'Groceries',
+    'Taxes',
+    'Entertainment',
+    'Education',
+    'Clothing',
+    'Healthcare',
+    'Sports',
+    'Travel',
+    'Gifts',
+    'Miscellaneous',
+  ];
+
   constructor(
     private router: Router,
     private authService: AuthService,
-    private spinnerService: SpinnerService
+    private spinnerService: SpinnerService,
+    private catService: CategoryCrudService
   ) { }
 
   ngOnInit() {
@@ -79,7 +107,9 @@ export class AuthComponent {
         .subscribe({
           next: response => {
             console.log('User registered', response);
-            this.isRegistering = false;
+            console.log("USER ID = ", response.localId);
+          this.loadCategoriesToNewUser(response.localId);
+          this.isRegistering = false;
             this.resetMessage = "Account created! Please log in.";
           },
           error: error => {
@@ -101,6 +131,13 @@ export class AuthComponent {
     }
 
     form.reset();
+  }
+
+  loadCategoriesToNewUser(userId: string) {
+    this.categories.forEach(category => {
+      this.catService.addCategory(category, userId).subscribe((response) => {});
+    });
+    console.log("CATEGORIES LOADED TO USER: ", userId);
   }
 
   resetPassword() {
