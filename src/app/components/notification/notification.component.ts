@@ -1,6 +1,7 @@
 import { CommonModule, NgClass, NgIf } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NotificationService } from '../../services/notification.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-notification',
@@ -9,24 +10,28 @@ import { NotificationService } from '../../services/notification.service';
   templateUrl: './notification.component.html',
   styleUrls: ['./notification.component.css']
 })
-export class NotificationComponent {
+export class NotificationComponent implements OnInit, OnDestroy{
   message: string = '';
   type: 'success' | 'error' | 'warning' = 'success';
   isVisible: boolean = false;
+  private notificationSubscription!: Subscription;
 
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
-    this.notificationService.notification$.subscribe((notification) => {
+    this.notificationSubscription = this.notificationService.notification$.subscribe((notification) => {
       if (notification) {
         this.message = notification.message;
         this.type = notification.type;
         this.isVisible = true;
-
-        setTimeout(() => {
-          this.isVisible = false;
-        }, 3000);
+      } else {
+        this.isVisible = false;
       }
     });
   }
+
+  ngOnDestroy(): void {
+    this.notificationSubscription.unsubscribe(); // cleanup to prevent memory leaks
+  }
+  
 }
