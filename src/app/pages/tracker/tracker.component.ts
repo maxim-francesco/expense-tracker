@@ -9,7 +9,7 @@ import {
   TrackerConfigService,
   TrackerConfig,
 } from '../../services/tracker-config.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import {
@@ -29,6 +29,7 @@ import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
 import { _Category, CategoryCrudService } from '../../services/category-crud.service';
+import { NotificationComponent } from "../../components/notification/notification.component";
 
 interface DaySpending {
   date: string;
@@ -41,7 +42,7 @@ interface DaySpending {
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent],
+  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent, NotificationComponent, NgIf],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })
@@ -77,6 +78,20 @@ export class TrackerComponent implements OnInit {
     this.currentWeekEnd = endDate.toISOString().split('T')[0];
   }
 
+  //Notification------------------------------------------------------
+
+  notificationMessage: string = '';
+  notificationType: 'success' | 'error' | 'warning' = 'success';
+
+  showNotification(message: string, type: 'success' | 'error' | 'warning') {
+    this.notificationMessage = message;
+    this.notificationType = type;
+
+    setTimeout(() => {
+      this.notificationMessage = ''; // auto-hide after 3s
+    }, 3000);
+  }
+  
   //------------------------------------------------------------------
 
   //Excel-------------------------------------------------------------
@@ -307,9 +322,16 @@ export class TrackerComponent implements OnInit {
   }
 
   addExpenseFromForm(): void {
+    if (!this.selectedCategory || !this.expenseName || !this.expenseAmount) {
+      this.showNotification('Please fill out all fields.', 'warning');
+      return;
+    }
+
     const newExpense = this.createNewItem();
     this.resetSavingForm();
     this.addExpense(newExpense);
+
+    this.showNotification('Expense added successfully!', 'success');
   }
 
   addExpense(newExpense: Expense2) {
@@ -446,6 +468,7 @@ export class TrackerComponent implements OnInit {
   deleteExpense2(expense: Expense2): void {
     this.verifyDeletion().subscribe(() => {
       this.delete(expense);
+      this.showNotification('Expense deleted successfully!', 'success');
     });
   }
 
@@ -482,7 +505,7 @@ export class TrackerComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
-    this.errorMessage = '';
+    // this.errorMessage = '';
 
     if (!value) {
       return;
@@ -491,7 +514,8 @@ export class TrackerComponent implements OnInit {
     const numValue = parseFloat(value);
 
     if (numValue <= 0) {
-      this.errorMessage = 'Amount must be greater than 0';
+      // this.errorMessage = 'Amount must be greater than 0';
+      this.showNotification('Amount must be greater than 0', 'warning');
       return;
     }
 

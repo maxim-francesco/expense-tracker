@@ -368,6 +368,12 @@ p {
     margin: 0;
 }
 
+.notification-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 @media screen and (max-width: 376px) {
     .background-container {
         background-image: none;

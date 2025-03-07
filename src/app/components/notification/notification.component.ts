@@ -1,11 +1,12 @@
-import { NgClass } from '@angular/common';
+import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-notification',
-  imports: [NgClass],
+  standalone: true, 
+  imports: [CommonModule, NgIf, NgClass],
   templateUrl: './notification.component.html',
-  styleUrl: './notification.component.css'
+  styleUrls: ['./notification.component.css']
 })
 export class NotificationComponent {
   @Input() message: string = '';
@@ -16,5 +17,5 @@ export class NotificationComponent {
   closeNotification() {
     this.isVisible = false;
   }
-
+  
 }
