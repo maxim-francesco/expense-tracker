@@ -9,7 +9,7 @@ import {
   TrackerConfigService,
   TrackerConfig,
 } from '../../services/tracker-config.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrudService } from '../../services/crud.service';
 import {
@@ -32,6 +32,8 @@ import { SpinnerService } from '../../services/spinner.service';
 import { LoadingSpinnerComponent } from "../../components/loading-spinner/loading-spinner.component";
 import { finalize } from 'rxjs';
 import { _Category, CategoryCrudService } from '../../services/category-crud.service';
+import { NotificationComponent } from "../../components/notification/notification.component";
+import { NotificationService } from '../../services/notification.service';
 
 interface DaySpending {
   date: string;
@@ -44,7 +46,7 @@ interface DaySpending {
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent, LoadingSpinnerComponent],
+  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent, NotificationComponent, NgIf, LoadingSpinnerComponent],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })
@@ -67,6 +69,7 @@ export class TrackerComponent implements OnInit {
     private expensesCrudService: ExpensesCrudService,
     private spinnerService: SpinnerService,
     private categoryCrudService: CategoryCrudService,
+    private notificationService: NotificationService
   ) {}
 
 
@@ -123,22 +126,35 @@ export class TrackerComponent implements OnInit {
   }
 
   processImage(): void {
-    if (!this.selectedFile) return;
+    if (!this.selectedFile) {
+      this.notificationService.showNotification('Please select a file before extracting!', 'error');
+      return;
+    }
 
     this.spinnerService.showSpinner();
 
     const reader = new FileReader();
     reader.onload = () => {
       const base64Image = (reader.result as string).split(',')[1];
-      this.ocrService.extractText(base64Image)
-        .pipe(finalize(() => this.spinnerService.hideSpinner()))
-        .subscribe((response) => {
-          if (response.responses && response.responses.length > 0) {
-            this.extractedText = response.responses[0].fullTextAnnotation?.text || '';
-            this.scanReceiptAndExtractExpenses(this.extractedText);
-          }
-        });
+      this.ocrService.extractText(base64Image).subscribe((response) => {
+        if (response.responses && response.responses.length > 0) {
+          this.extractedText =
+            response.responses[0].fullTextAnnotation?.text || '';
+
+            if (!this.extractedText.trim()) {
+              this.notificationService.showNotification('No text found in the image!', 'warning');
+              return;
+            }
+
+          this.scanReceiptAndExtractExpenses(this.extractedText);
+        }
+      });
     };
+
+    reader.onerror = () => {
+      this.notificationService.showNotification('Error reading the image file!', 'error');
+    };
+
     reader.readAsDataURL(this.selectedFile);
   }
 
@@ -317,14 +333,22 @@ export class TrackerComponent implements OnInit {
   }
 
   addExpenseFromForm(): void {
+    if (!this.selectedCategory || !this.expenseName || !this.expenseAmount) {
+      this.notificationService.showNotification('Please fill out all fields.', 'warning');
+      return;
+    }
+
     const newExpense = this.createNewItem();
     this.resetSavingForm();
     this.addExpense(newExpense);
+
   }
 
   addExpense(newExpense: Expense2) {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
+      this.notificationService.showNotification('Expense added successfully!', 'success');
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
+      
     });
   }
 
@@ -461,6 +485,7 @@ export class TrackerComponent implements OnInit {
     this.verifyDeletion().subscribe(() => {
       this.spinnerService.showSpinner();
       this.delete(expense);
+      this.notificationService.showNotification('Expense deleted successfully!', 'success');
     });
   }
 
@@ -497,16 +522,19 @@ export class TrackerComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
-    this.errorMessage = '';
+    // this.errorMessage = '';
 
     if (!value) {
+      this.isSaveDisabled = true;
       return;
     }
 
     const numValue = parseFloat(value);
 
     if (numValue <= 0) {
-      this.errorMessage = 'Amount must be greater than 0';
+      // this.errorMessage = 'Amount must be greater than 0';
+      this.isSaveDisabled = true;
+      this.notificationService.showNotification('Amount must be greater than 0', 'warning');
       return;
     }
 
@@ -514,17 +542,26 @@ export class TrackerComponent implements OnInit {
       const parts = value.split('.');
       if (parts[1] && parts[1].length > 2) {
         input.value = numValue.toFixed(2);
+        this.notificationService.showNotification('Only two decimal places allowed.', 'warning');
       }
     }
+    this.isSaveDisabled = false;
   }
 
   validateFormAtSave() {
-    this.isSaveDisabled =
-      !this.selectedCategory ||
-      !this.expenseName ||
-      !this.expenseAmount ||
-      this.expenseAmount <= 0;
+    const isValid =
+      this.selectedCategory &&
+      this.expenseName.trim() !== '' &&
+      this.expenseAmount &&
+      this.expenseAmount > 0;
+
+    this.isSaveDisabled = !isValid;
+
+    if (!isValid) {
+      this.notificationService.showNotification('Please fill out all fields correctly.', 'warning');
+    }
   }
+
   validateFormAtUpdate() {
     this.isSaveDisabled = false;
   }

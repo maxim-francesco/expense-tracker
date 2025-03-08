@@ -11,6 +11,7 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { firebaseConfig } from './environment';
 import { AuthGuard } from './app/guards/auth.guard';
 import { provideDatabase, getDatabase } from '@angular/fire/database';
+import { NotFoundComponent } from './app/components/not-found/not-found.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -18,6 +19,8 @@ const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   { path: 'track', component: TrackerComponent, canActivate: [AuthGuard] },
   { path: 'about-us', component: AboutusComponent },
+  { path: '404', component: NotFoundComponent }, 
+  { path: '**', redirectTo: '/404' }
 ];
 
 bootstrapApplication(AppComponent, {
