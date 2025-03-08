@@ -1,4 +1,7 @@
 <div class="background-container">
+
+  <app-loading-spinner />
+
   <div class="overlay">
     <div class="card">
       <div class="head">
@@ -206,10 +209,7 @@
               <div *ngIf="day.isExpanded" class="expense-list">
                 <h4>Expenses for {{ day.dayName }}</h4>
                 <div *ngIf="day.expenses && day.expenses.length > 0">
-                  <div
-                    class="expense-item"
-                    *ngFor="let _expense of day.expenses"
-                  >
+                  <div class="expense-item" *ngFor="let _expense of day.expenses">
                     <div class="expense-info">
                       <span class="expense-name">{{
                         _expense.name }}</span>
@@ -272,8 +272,8 @@
 
 
 
-           
-          
+
+
 
 
 <app-chatbot></app-chatbot>
