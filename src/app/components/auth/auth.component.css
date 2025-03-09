@@ -1,7 +1,5 @@
 .background-container {
-  background-image: url('../../../../public/homeBackground.jpg');
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fec7a5;
   position: fixed;
   top: 0;
   left: 0;
@@ -11,20 +9,21 @@
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  z-index: -1;
+  z-index: 100;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+ 
 }
 
 .form {
-  --input-focus: #2d8cf0;
+  --input-focus: #14b4a1;
   --font-color: #323232;
   --font-color-sub: #666;
-  --bg-color: beige;
+  --bg-color: rgb(255, 255, 255);
   --main-color: black;
   padding: 20px;
-  background: lightblue;
+  background: rgb(255, 255, 255);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -33,6 +32,13 @@
   border-radius: 5px;
   border: 2px solid var(--main-color);
   box-shadow: 4px 4px var(--main-color);
+  margin-right: 70px;
+  transition: all 0.3s ease;
+}
+
+.form:hover{
+  transform: scale(1.1);
+  background-color: #ffea97;
 }
 
 h2 {
@@ -118,7 +124,7 @@ h2 {
 .button-confirm:hover {
   translate: 1.5px 1.5px;
   box-shadow: 1.5px 1.5px 0 #000000;
-  background: #1ac2ff;
+  background: #86aaff;
 }
 
 p {
@@ -150,4 +156,31 @@ p {
 .divider {
   margin: 0 10px;
   font-weight: bold;
+}
+
+.right-section {
+  background-image: url("../../../../public/login-background.png"); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 50%;
+  height: 45%; 
+  text-decoration: none;
+  font-weight: normal;
+  padding: 10px 20px;
+  display: block;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0 #000000;
+  animation: slide-in-left 0.8s ease-out forwards;
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }

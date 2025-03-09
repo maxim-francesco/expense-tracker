@@ -1,10 +1,20 @@
-<div class="background-container">
-  <div class="card">
-    <div class="head">About Us</div>
-    <div class="content">
-      <p>Welcome to the <strong class="highlight">Expense Tracker App</strong>, your go-to tool for managing daily
-        expenses efficiently.</p>
 
+<div class="intro-section">
+  <div class="image-container">
+    <button class="about-button" (click)="scrollToIntro()">ABOUT US</button>
+  </div>
+  <div class="intro-text" id="intro">
+    
+    <p>Welcome to the Expense Tracker App, your go-to tool for managing daily expenses efficiently. Our app is designed to help you take control of your finances by providing easy-to-use features for tracking, categorizing, and analyzing your spending habits. Whether you're budgeting for the month, keeping track of recurring expenses, or just trying to save more, this app is here to guide you. </p>
+
+  </div>
+  
+</div>
+
+
+  <div class="card-wrapper">
+    <div class="card">
+      <div class="head">Expense Tracker App</div>
       <div class="features">
         <h3>With our app, you can:</h3>
         <ul>
@@ -22,18 +32,19 @@
           </li>
         </ul>
       </div>
-
+    </div>
+    <div class="card">
+      <div class="head">Who We Are</div>
       <div class="team-section">
-        <h3> Who We Are</h3>
         <p>We are a <span class="highlight">team of 6 dedicated individuals</span> who have worked collaboratively,
           sharing tasks efficiently to bring this project to life.</p>
       </div>
-
+    </div>
+    <div class="card">
+      <div class="head">Our Mission</div>
       <div class="mission">
-        <h3>Our Mission</h3>
-        <p>To simplify personal finance management through an <strong class="highlight">intuitive and
-            user-friendly</strong> experience.</p>
+        <p>To simplify personal finance management through an <strong class="highlight">intuitive and user-friendly</strong> experience.</p>
       </div>
     </div>
   </div>
-</div>
+

@@ -66,15 +66,20 @@
 
           <div class="upload-receipt">
 
+           <!-- Hidden File Input -->
             <input
-              placeholder="Upload Receipt"
-              (change)="onFileSelected($event)"
-              class="upload-button"
-              type="file"
-              accept="image/*"
+            #fileInput
+            (change)="onFileSelected($event)"
+            type="file"
+            accept="image/*"
+            style="display: none"
             />
+
+            <!-- Custom Button -->
+            <button class="upload-button" (click)="fileInput.click()">Upload Receipt</button>
+
             <button class="extract-button" (click)="processImage()">
-              Extract Expenses
+              Extract
             </button>
           </div>
 
@@ -267,7 +272,9 @@
         </ng-container>
       </div>
     </div>
+    
   </div>
+  <div class="tracker-photo"></div>
 </div>
 
 
