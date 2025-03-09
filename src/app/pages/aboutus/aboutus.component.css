@@ -1,35 +1,97 @@
-.background-container {
-    background-image: url('../../../../public/homeBackground.jpg');
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+@import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap');
+
+.intro-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 100vh;
+    padding: 20px;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.image-container {
+    background-image: url('../../../../public/homeBackground.jpg');
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-    z-index: -1;
+    height: 100%;
+    width: 80%;
+    margin-top: 10px;
+}
+
+.intro-text {
+    padding: 20px;
+    text-align: left;
+    font-family: Montserrat, sans-serif;
+    font-weight: bold;
+    width: 90%;
+}
+
+.about-button {
+    background-color: #25252500;
+    font-weight: bold;
+    position: absolute;
+    top: 23%;
+    left: 35%;
+    font-size: 60px;
+    color: #252525;
+    font-family: "Shadows Into Light", cursive;
+    transform: rotate(-12.5deg);
+    opacity: 0; /* Start invisible */
+    animation: fadeIn 2s ease-in forwards; /* Smooth fade-in effect */
+    transition: all 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+.about-button:hover{
+    transform: scale(1.1);
+    text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
+    transform: rotate(-7deg);
+}
+
+.intro-text p {
+    margin-top: 50px;
+    font-size: 16px;
+    color: #000000;
+    font-family: Montserrat, sans-serif;
+    color: rgb(0, 0, 0);
+    background-color: white;
+    text-decoration: none;
+    font-weight: normal;
+    padding: 10px 20px;
+    display: block;
+    border: 3px solid #000000;
+    box-shadow: 3px 3px 0 #000000;
+}
+
+.card-wrapper {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: flex-start;
-    padding-top: 100px;
-    overflow-y: auto;
+    display: flex;
+    margin-left: 40px;
+    margin-top: 60px; 
+    padding-bottom: 200px;
 }
 
 .card {
     font-family: Montserrat, sans-serif;
-    width: 420px;
-    max-height: 80vh;
-    background: #0c3a9a;
+    width: 300px;
+    height: 250px;
+    translate: -6px -6px;
+    background: #18a899;
     border: 3px solid #000000;
-    box-shadow: 10px 10px 0 #000000;
+    box-shadow: 12px 12px 0 #000000;
+    overflow: hidden;
     transition: all 0.3s ease;
-    text-align: center;
-    padding: 20px;
-    position: relative;
-    margin-top: 20px;
-    overflow-y: auto;
-    scrollbar-width: thin;
 }
 
 .card::-webkit-scrollbar {
@@ -41,33 +103,38 @@
     border-radius: 5px;
 }
 
+.card:hover {
+    transform: scale(1.1);
+}
+
 .head {
-    font-size: 18px;
+    font-family: Montserrat, sans-serif;
+    font-size: 14px;
     font-weight: 900;
+    width: 100%;
+    height: 32px;
     background: #ffffff;
+    padding: 5px 12px;
     color: #000000;
     border-bottom: 3px solid #000000;
-    padding: 10px;
-    margin-bottom: 15px;
 }
 
 .content {
-    font-size: 13px;
-    font-weight: 500;
-    color: white;
-    line-height: 1.6;
-    text-align: left;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .highlight {
-    color: #fec7a5;
+    color: #ffdf29;
     font-weight: bold;
 }
 
 .features {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0);
     padding: 10px;
     margin-bottom: 15px;
+    color: white;
 }
 
 .features ul {
@@ -95,9 +162,10 @@
 
 .team-section,
 .mission {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0);
     padding: 12px;
     margin-bottom: 15px;
+    color: white;
 }
 
 .features li:hover {
