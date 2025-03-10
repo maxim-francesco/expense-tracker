@@ -348,7 +348,7 @@ export class TrackerComponent implements OnInit {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
       this.notificationService.showNotification('Expense added successfully!', 'success');
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
-      
+
     });
   }
 
@@ -469,7 +469,7 @@ export class TrackerComponent implements OnInit {
 
   private verifyDeletion() {
     return this.confirmDialogService.confirm({
-      message: 'Are you sure you want to delete this expense?',
+      message: 'Are you sure you want to delete?',
     });
   }
 
@@ -630,8 +630,13 @@ export class TrackerComponent implements OnInit {
   }
 
   deleteCategory(categoryId: string) {
-    this.categoryCrudService.deleteCategory(categoryId, this.authService.getId()!);
-    this.loadCategories();
+    this.verifyDeletion().subscribe(() => {
+      this.spinnerService.showSpinner();
+      this.categoryCrudService.deleteCategory(categoryId, this.authService.getId()!);
+      this.loadCategories();
+      this.spinnerService.hideSpinner();
+      this.notificationService.showNotification('Expense deleted successfully!', 'success');
+    });
   }
 
   editCategory(category: _Category) {
