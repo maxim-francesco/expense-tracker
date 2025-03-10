@@ -1,18 +1,716 @@
-.background-container {
-  background-image: url('../../../../public/homeBackground.jpg');
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+html,
+body {
+  height: 100%;
+  margin: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: -1;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  /* Push sections to opposite sides */
+  align-items: center;
+  padding: 20px;
+}
+
+.section {
+  width: 100%;
+  /* Ensure sections span full width */
+  height: 100vh;
+  /* Full height of the viewport */
+  background-size: cover;
+  /* Ensures background image covers the section */
+  background-position: center;
+  /* Centers the background image */
+  background-repeat: no-repeat;
+  /* Avoids tiling of background images */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  /* Remove any margin */
+  padding: 0;
+  /* Remove any padding */
+  box-sizing: border-box;
+  /* Ensures padding and borders don't affect width/height */
+  margin-top: -25px;
+
+}
+
+.greet-section {
+  width: 40%;
+  /* Adjust width to fit beside first-section */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  /* Stack elements vertically */
+  margin-right: -20px;
+}
+
+.title-text {
+  font-size: 100px;
+  font-weight: bold;
+  /* Make the title bold */
+  margin-bottom: 10px;
+  /* Add space between title and content */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  /* Ensures the text is hidden initially */
+  white-space: normal;
+  /* Allow the text to wrap onto multiple lines */
+  word-wrap: break-word;
+  /* Ensure long words break and wrap properly */
+  width: 100%;
+  /* Allow text to take up full width of the container */
+  animation: fadeInTitle 5s forwards;
+}
+
+
+
+.main-content {
+  font-size: 1em;
+  line-height: 1.5;
+  max-width: 80%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.first-section {
+  background-image: url("../../../../public/homeBackgroun1.jpg");
+  margin-left: -40px;
+  margin-top: 10px;
+  font-family: 'Montserrat', sans-serif;
+  width: 60%;
+  max-width: 800px;
+  height: 600px;
+  max-width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.second-section {
+  background-color: rgb(255, 255, 255);
+  font-family: 'Montserrat', sans-serif;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.second-section-text {
+  width: 40%;
+  /* Adjust width to fit beside first-section */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  /* Stack elements vertically */
+  margin-right: -20px;
+}
+
+
+.second-section-title {
+  font-size: 50px;
+  margin-left: 100px;
+  color: rgb(0, 0, 0);
+  font-weight: bold;
+  /* Make the title bold */
+  margin-bottom: 30px;
+  /* Add space between title and content */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden;
+  /* Ensures the text is hidden initially */
+  white-space: nowrap;
+  /* Prevents text from wrapping */
+  opacity: 0;
+  animation: fadeInTitle 4s forwards;
+}
+
+.main-content-second {
+  font-size: 1em;
+  margin-left: 100px;
+  line-height: 1.5;
+  max-width: 80%;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+}
+
+.bar-chart-container {
+  width: 40%;
+  transform: translate(50%);
+  position: relative;
+  text-align: center;
+  padding: 30px;
+  /* Add padding inside the container */
+  background-color: white;
+  /* Background inside the container */
+  border: 5px solid black;
+  /* Black border around the chart container */
+
+}
+
+.bar-chart {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  align-items: flex-end;
+  position: relative;
+  height: 450px;
+  gap: 10px;
+  background-color: white;
+  /* White background for the chart itself */
+  padding: 30px;
+  /* Padding inside the chart, making it look like it has inner spacing */
+  border-radius: 8px;
+  /* Optional: Add rounded corners to the chart container */
+  box-sizing: border-box;
+  /* Ensure padding doesn't affect the size */
+}
+
+.bar {
+  width: 40%;
+  height: 0;
+  /* Start with 0 height */
+  position: relative;
+  /* Keep bars positioned relatively within the container */
+  animation: growBar 2s forwards;
+}
+
+#bar1 {
+  background-color: #4caf50;
+  /* Green */
+  animation-delay: 0s;
+  animation-duration: 2s;
+}
+
+#bar2 {
+  background-color: #ff9800;
+  /* Orange */
+  animation-delay: 0.5s;
+  animation-duration: 2s;
+}
+
+#bar3 {
+  background-color: #2196f3;
+  /* Blue */
+  animation-delay: 1s;
+  animation-duration: 2s;
+}
+
+#bar4 {
+  background-color: #f44336;
+  /* Red */
+  animation-delay: 1.5s;
+  animation-duration: 2s;
+}
+
+#bar5 {
+  background-color: #ae36f4;
+  /* Red */
+  animation-delay: 2s;
+  animation-duration: 2s;
+}
+
+#bar6 {
+  background-color: #36def4;
+  /* Red */
+  animation-delay: 2.5s;
+  animation-duration: 2s;
+}
+
+#bar7 {
+  background-color: #f48236;
+  /* Red */
+  animation-delay: 3s;
+  animation-duration: 2s;
+}
+
+#bar1 {
+  animation: growBar 2s forwards;
+}
+
+#bar2 {
+  animation: growBar2 3s forwards;
+}
+
+#bar3 {
+  animation: growBar3 4s forwards;
+}
+
+#bar4 {
+  animation: growBar4 5s forwards;
+}
+
+#bar5 {
+  animation: growBar5 6s forwards;
+}
+
+#bar6 {
+  animation: growBar6 7s forwards;
+}
+
+#bar7 {
+  animation: growBar7 8s forwards;
+}
+
+/* Animation to grow bars from bottom to top */
+@keyframes growBar {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 150px;
+    /* Adjust this height for bar1 */
+  }
+}
+
+/* Custom keyframes for each bar */
+@keyframes growBar2 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 200px;
+    /* Bar 2 height */
+  }
+}
+
+@keyframes growBar3 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 240px;
+    /* Bar 3 height */
+  }
+}
+
+@keyframes growBar4 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 300px;
+    /* Bar 4 height */
+  }
+}
+
+@keyframes growBar5 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 330px;
+    /* Bar 4 height */
+  }
+}
+
+@keyframes growBar6 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 380px;
+    /* Bar 4 height */
+  }
+}
+
+
+@keyframes growBar7 {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 390px;
+    /* Bar 4 height */
+  }
+}
+
+
+@keyframes fadeInTitle {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeInTitle 2s forwards;
+}
+
+button {
+  margin-top: 40px;
+  color: rgb(0, 0, 0);
+  background-color: white;
+  text-decoration: none;
+  font-weight: normal;
+  padding: 10px 20px;
+  display: block;
+  border: 3px solid #000000;
+  box-shadow: 3px 3px 0 #000000;
+  transition: background 0.3s ease-in-out;
+  font-weight: 750;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+button:hover {
+  translate: 1.5px 1.5px;
+  box-shadow: 1.5px 1.5px 0 #000000;
+  background: #1ac2ff;
+}
+
+.displayed-text {
+  position: absolute;
+  top: 270%;
+  font-size: 40px;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflowing text */
+  width: 0; 
+  animation: typing 3s steps(40, end) forwards;
+}
+
+/* Typewriter effect */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.container-button {
+  background-color: #ffffff;
+  display: flex;
+  width: 920px;
+  /* Doubled from 460px */
+  height: 240px;
+  /* Doubled from 120px */
+  position: relative;
+  border-radius: 12px;
+  /* Doubled from 6px */
+  transition: 0.3s ease-in-out;
+}
+
+.container-button:hover {
+  transform: scale(1.03);
+  width: 440px;
+  /* Doubled from 220px */
+}
+
+.container-button:hover .left-side {
+  width: 100%;
+}
+
+.left-side {
+  background-color: #5de2a3;
+  width: 260px;
+  /* Doubled from 130px */
+  height: 240px;
+  /* Doubled from 120px */
+  border-radius: 8px;
+  /* Doubled from 4px */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.3s;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.right-side {
+  width: calc(100% - 260px);
+  /* Doubled from 130px */
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  justify-content: space-between;
+  white-space: nowrap;
+  transition: 0.3s;
+}
+
+.right-side:hover {
+  background-color: #f9f7f9;
+}
+
+.arrow {
+  width: 40px;
+  /* Doubled from 20px */
+  height: 40px;
+  /* Doubled from 20px */
+  margin-right: 40px;
+  /* Doubled from 20px */
+}
+
+.new {
+  font-size: 46px;
+  /* Doubled from 23px */
+  font-family: "Lexend Deca", sans-serif;
+  margin-left: 40px;
+  /* Doubled from 20px */
+}
+
+.card-button {
+  width: 140px;
+  /* Doubled from 70px */
+  height: 92px;
+  /* Doubled from 46px */
+  background-color: #c7ffbc;
+  border-radius: 12px;
+  /* Doubled from 6px */
+  position: absolute;
+  display: flex;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  -webkit-box-shadow: 18px 18px 18px -4px rgba(77, 200, 143, 0.72);
+  /* Doubled from 9px */
+  -moz-box-shadow: 18px 18px 18px -4px rgba(77, 200, 143, 0.72);
+  /* Doubled from 9px */
+  -webkit-box-shadow: 18px 18px 18px -4px rgba(77, 200, 143, 0.72);
+  /* Doubled from 9px */
+}
+
+.card-line {
+  width: 130px;
+  /* Doubled from 65px */
+  height: 26px;
+  /* Doubled from 13px */
+  background-color: #80ea69;
+  border-radius: 4px;
+  /* Doubled from 2px */
+  margin-top: 14px;
+  /* Doubled from 7px */
+}
+
+@media only screen and (max-width: 480px) {
+  .container-button {
+    transform: scale(0.7);
+  }
+
+  .container-button:hover {
+    transform: scale(0.74);
+  }
+
+  .new {
+    font-size: 36px;
+    /* Doubled from 18px */
+  }
+}
+
+.buttons {
+  width: 16px;
+  /* Doubled from 8px */
+  height: 16px;
+  /* Doubled from 8px */
+  background-color: #379e1f;
+  box-shadow: 0 -20px 0 0 #26850e, 0 20px 0 0 #56be3e;
+  /* Doubled shadow sizes */
+  border-radius: 50%;
+  margin-top: 10px;
+  /* Doubled from 5px */
+  transform: rotate(90deg);
+  margin: 20px 0 0 -60px;
+  /* Doubled margin */
+}
+
+.container-button:hover .card-button {
+  animation: slide-top 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) both;
+}
+
+.container-button:hover .post {
+  animation: slide-post 1s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+@keyframes slide-top {
+  0% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  50% {
+    -webkit-transform: translateY(-140px);
+    /* Doubled from -70px */
+    transform: translateY(-140px);
+    /* Doubled from -70px */
+  }
+
+  60% {
+    -webkit-transform: translateY(-140px);
+    /* Doubled from -70px */
+    transform: translateY(-140px);
+    /* Doubled from -70px */
+  }
+
+  100% {
+    -webkit-transform: translateY(-16px);
+    /* Doubled from -8px */
+    transform: translateY(-16px);
+    /* Doubled from -8px */
+  }
+}
+
+.post {
+  width: 126px;
+  /* Doubled from 63px */
+  height: 150px;
+  /* Doubled from 75px */
+  background-color: #dddde0;
+  position: absolute;
+  z-index: 11;
+  bottom: 20px;
+  /* Doubled from 10px */
+  top: 240px;
+  /* Doubled from 120px */
+  border-radius: 12px;
+  /* Doubled from 6px */
+  overflow: hidden;
+}
+
+.post-line {
+  width: 94px;
+  /* Doubled from 47px */
+  height: 18px;
+  /* Doubled from 9px */
+  background-color: #545354;
+  position: absolute;
+  border-radius: 0px 0px 6px 6px;
+  /* Doubled border radius */
+  right: 16px;
+  /* Doubled from 8px */
+  top: 16px;
+  /* Doubled from 8px */
+}
+
+.post-line:before {
+  content: "";
+  position: absolute;
+  width: 94px;
+  /* Doubled from 47px */
+  height: 18px;
+  /* Doubled from 9px */
+  background-color: #757375;
+  top: -16px;
+  /* Doubled from -8px */
+}
+
+.screen {
+  width: 94px;
+  /* Doubled from 47px */
+  height: 46px;
+  /* Doubled from 23px */
+  background-color: #ffffff;
+  position: absolute;
+  top: 44px;
+  /* Doubled from 22px */
+  right: 16px;
+  /* Doubled from 8px */
+  border-radius: 6px;
+  /* Doubled from 3px */
+}
+
+.numbers {
+  width: 24px;
+  /* Doubled from 12px */
+  height: 24px;
+  /* Doubled from 12px */
+  background-color: #838183;
+  box-shadow: 0 -36px 0 0 #838183, 0 36px 0 0 #838183;
+  /* Doubled shadow sizes */
+  border-radius: 4px;
+  /* Doubled from 2px */
+  position: absolute;
+  transform: rotate(90deg);
+  left: 50px;
+  /* Doubled from 25px */
+  top: 104px;
+  /* Doubled from 52px */
+}
+
+.numbers-line2 {
+  width: 24px;
+  /* Doubled from 12px */
+  height: 24px;
+  /* Doubled from 12px */
+  background-color: #aaa9ab;
+  box-shadow: 0 -36px 0 0 #aaa9ab, 0 36px 0 0 #aaa9ab;
+  /* Doubled shadow sizes */
+  border-radius: 4px;
+  /* Doubled from 2px */
+  position: absolute;
+  transform: rotate(90deg);
+  left: 50px;
+  /* Doubled from 25px */
+  top: 136px;
+  /* Doubled from 68px */
+}
+
+@keyframes slide-post {
+  50% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  100% {
+    -webkit-transform: translateY(-140px);
+    /* Doubled from -70px */
+    transform: translateY(-140px);
+    /* Doubled from -70px */
+  }
+}
+
+.dollar {
+  position: absolute;
+  font-size: 32px;
+  /* Doubled from 16px */
+  font-family: "Lexend Deca", sans-serif;
+  width: 100%;
+  left: 0;
+  top: 0;
+  color: #4b953b;
+  text-align: center;
+}
+
+.container-button:hover .dollar {
+  animation: fade-in-fwd 0.3s 1s backwards;
+}
+
+@keyframes fade-in-fwd {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+    /* Doubled from -5px */
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 .card {
   font-family: 'Montserrat', sans-serif;
@@ -45,12 +743,11 @@
 }
 
 .overlay {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {

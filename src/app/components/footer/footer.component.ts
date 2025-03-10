@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class FooterComponent {
   sticky = true;
-  transparent = true;
+  transparent = false;
   footerText = '© Expense Tracker App'; 
 
   constructor(

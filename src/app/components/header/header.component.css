@@ -21,16 +21,21 @@ body {
 }
 
 .navbar {
-    background: #0c3a9a;
+    position: fixed;
+    top: 4%;  
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    background: #ffffff;
     color: rgb(255, 255, 255);
-    width: 80%;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
     margin: 0 auto;
-    border: 2px solid black;
+    border-bottom: 2px solid black;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    
 }
 
 .nav-container {

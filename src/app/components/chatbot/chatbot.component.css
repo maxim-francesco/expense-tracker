@@ -1,15 +1,14 @@
 .chatbot-container,.chatbot-container.open {
   position: fixed;
-  bottom: 20px;
+  bottom: 70px;
   right: 20px;
-  width: 350px;
+  width: 300px;
   max-width: 90%;
-  background: #000;
+  background: #ffffff;
   border: 3px solid #000;
   overflow: hidden;
   transition: all 0.3s ease-in-out;
   z-index: 1000;
-
 }
 
 .chat-header {
