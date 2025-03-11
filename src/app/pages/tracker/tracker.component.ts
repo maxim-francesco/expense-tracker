@@ -29,11 +29,20 @@ import { ExpensesCrudService } from '../../services/expenses-crud.service';
 import { Expense2 } from '../../services/expenses-crud.service';
 import { AuthService } from '../../services/auth.service';
 import { SpinnerService } from '../../services/spinner.service';
-import { LoadingSpinnerComponent } from "../../components/loading-spinner/loading-spinner.component";
+import { LoadingSpinnerComponent } from '../../components/loading-spinner/loading-spinner.component';
 import { finalize } from 'rxjs';
-import { _Category, CategoryCrudService } from '../../services/category-crud.service';
-import { NotificationComponent } from "../../components/notification/notification.component";
+import {
+  _Category,
+  CategoryCrudService,
+} from '../../services/category-crud.service';
+import { NotificationComponent } from '../../components/notification/notification.component';
 import { NotificationService } from '../../services/notification.service';
+import { PopoutComponent } from '../../components/popout/popout.component';
+import { PopoutService } from '../../components/popout/popout.service';
+import {
+  WeeklyBudget,
+  WeeklyBudgetService,
+} from '../../services/weekly-budget.service';
 
 interface DaySpending {
   date: string;
@@ -46,18 +55,27 @@ interface DaySpending {
 @Component({
   selector: 'app-tracker',
   standalone: true,
-  imports: [CommonModule, FormsModule, PieComponent, ChatbotComponent, NotificationComponent, NgIf, LoadingSpinnerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    PieComponent,
+    ChatbotComponent,
+    NotificationComponent,
+    NgIf,
+    LoadingSpinnerComponent,
+    PopoutComponent,
+  ],
   templateUrl: './tracker.component.html',
   styleUrls: ['./tracker.component.css'],
 })
 export class TrackerComponent implements OnInit {
-
   categories: _Category[] = [];
   filteredCategories: _Category[] = [];
 
-
   //Services---------------------------------------------------------
   constructor(
+    private budgetService: WeeklyBudgetService,
+    private popoutService: PopoutService,
     private authService: AuthService,
     //private trackerConfigService: TrackerConfigService,
     //private crudService: CrudService,
@@ -72,19 +90,51 @@ export class TrackerComponent implements OnInit {
     private notificationService: NotificationService
   ) {}
 
-
   ngOnInit() {
     this.spinnerService.showSpinner();
-
     this.loadTodayExpenses();
     this.loadWeekDays();
     this.loadExpensesForWeek(this.week);
     this.loadCategories();
     this.filteredCategories = [...this.categories];
-    const { startDate, endDate } = this.getWeekInterval(new Date().toISOString().split('T')[0]);
+    const { startDate, endDate } = this.getWeekInterval(
+      new Date().toISOString().split('T')[0]
+    );
     this.currentWeekStart = startDate.toISOString().split('T')[0];
     this.currentWeekEnd = endDate.toISOString().split('T')[0];
 
+    this.budgetService
+      .getBudgetForUserByDate(this.authService.getId()!, this.currentWeekEnd)
+      .subscribe((resp) => {
+        //here goes implementation
+        console.log('aici:', resp);
+        if (resp == null || resp == undefined) {
+          const newBudget: WeeklyBudget = {
+            weeklyBudget: 0,
+            currentSpending: this.getWeeklyTotal(),
+            startDate: this.currentWeekEnd,
+            userId: this.authService.getId()!,
+          };
+
+          this.popoutService.showPopup(newBudget);
+          // const budget = this.popoutService.inputValue();
+          // console.log('aici3:', budget, this.popoutService.inputValue());
+
+          // if (budget != '') {
+          // const newBudget: WeeklyBudget = {
+          //   weeklyBudget: Number(budget),
+          //   currentSpending: this.getWeeklyTotal(),
+          //   startDate: this.currentWeekEnd,
+          //   userId: this.authService.getId()!,
+          // };
+          //   this.budgetService
+          //     .addWeeklyBudget(newBudget)
+          //     .subscribe((response) => {
+          //       console.log(response);
+          //     });
+          // }
+        }
+      });
   }
 
   //------------------------------------------------------------------
@@ -127,7 +177,10 @@ export class TrackerComponent implements OnInit {
 
   processImage(): void {
     if (!this.selectedFile) {
-      this.notificationService.showNotification('Please select a file before extracting!', 'error');
+      this.notificationService.showNotification(
+        'Please select a file before extracting!',
+        'error'
+      );
       return;
     }
 
@@ -141,10 +194,13 @@ export class TrackerComponent implements OnInit {
           this.extractedText =
             response.responses[0].fullTextAnnotation?.text || '';
 
-            if (!this.extractedText.trim()) {
-              this.notificationService.showNotification('No text found in the image!', 'warning');
-              return;
-            }
+          if (!this.extractedText.trim()) {
+            this.notificationService.showNotification(
+              'No text found in the image!',
+              'warning'
+            );
+            return;
+          }
 
           this.scanReceiptAndExtractExpenses(this.extractedText);
         }
@@ -152,7 +208,10 @@ export class TrackerComponent implements OnInit {
     };
 
     reader.onerror = () => {
-      this.notificationService.showNotification('Error reading the image file!', 'error');
+      this.notificationService.showNotification(
+        'Error reading the image file!',
+        'error'
+      );
     };
 
     reader.readAsDataURL(this.selectedFile);
@@ -164,11 +223,14 @@ export class TrackerComponent implements OnInit {
 
     this.spinnerService.showSpinner();
 
-    this.geminiService.extractExpenses(ocrText)
+    this.geminiService
+      .extractExpenses(ocrText)
       .pipe(finalize(() => this.spinnerService.hideSpinner()))
       .subscribe((response) => {
         let rawText = response.candidates[0]?.content?.parts[0]?.text || '[]';
-        const cleanedText = rawText.replace(/^```json\s*/, '').replace(/```$/, '');
+        const cleanedText = rawText
+          .replace(/^```json\s*/, '')
+          .replace(/```$/, '');
         const extractedExpenses = JSON.parse(cleanedText);
         this.extractedExpenses = extractedExpenses.map((expense: any) => ({
           ...expense,
@@ -197,7 +259,8 @@ export class TrackerComponent implements OnInit {
     this.spinnerService.showSpinner();
 
     this.geminiService
-      .analyzeWeeklyExpenses(allExpenses).pipe(finalize(() => this.spinnerService.hideSpinner()))
+      .analyzeWeeklyExpenses(allExpenses)
+      .pipe(finalize(() => this.spinnerService.hideSpinner()))
       .subscribe((response) => {
         const analysis = response.candidates[0]?.content?.parts[0]?.text;
         console.log('Gemini Analysis:', analysis);
@@ -245,7 +308,9 @@ export class TrackerComponent implements OnInit {
   }
 
   // 2️⃣ Funcție nouă: vector cu 7 zile - nume + dată (Luni-Duminică)
-  getCurrentWeekWithDays(startDate: string = new Date().toISOString().split('T')[0]): { date: string; dayName: string }[] {
+  getCurrentWeekWithDays(
+    startDate: string = new Date().toISOString().split('T')[0]
+  ): { date: string; dayName: string }[] {
     const date = new Date(startDate);
 
     // Get the first day of the week (Monday)
@@ -305,7 +370,7 @@ export class TrackerComponent implements OnInit {
     this.week = this.getCurrentWeekWithDays(startDate);
     this.selectedDay = this.findDayByDate(startDate);
     this.expenses2 = [];
-    this.loadExpensesForWeek(this.week);  // Load expenses for the selected week
+    this.loadExpensesForWeek(this.week); // Load expenses for the selected week
   }
 
   //------------------------------------------------------------------
@@ -334,21 +399,25 @@ export class TrackerComponent implements OnInit {
 
   addExpenseFromForm(): void {
     if (!this.selectedCategory || !this.expenseName || !this.expenseAmount) {
-      this.notificationService.showNotification('Please fill out all fields.', 'warning');
+      this.notificationService.showNotification(
+        'Please fill out all fields.',
+        'warning'
+      );
       return;
     }
 
     const newExpense = this.createNewItem();
     this.resetSavingForm();
     this.addExpense(newExpense);
-
   }
 
   addExpense(newExpense: Expense2) {
     this.expensesCrudService.addExpense(newExpense).subscribe((response) => {
-      this.notificationService.showNotification('Expense added successfully!', 'success');
+      this.notificationService.showNotification(
+        'Expense added successfully!',
+        'success'
+      );
       this.loadExpensesForUserOnDate(this.selectedDay!.date);
-
     });
   }
 
@@ -408,7 +477,15 @@ export class TrackerComponent implements OnInit {
       });
   }
 
+  urBudget = -1;
   getWeeklyTotal(): number {
+    this.budgetService
+      .getBudgetForUserByDate(this.authService.getId()!, this.currentWeekEnd)
+      .subscribe((resp) => {
+        if (resp != undefined && resp != null) {
+          this.urBudget = resp!.weeklyBudget;
+        }
+      });
     return this.weeklySpending.reduce((sum, day) => sum + day.total, 0);
   }
 
@@ -460,9 +537,12 @@ export class TrackerComponent implements OnInit {
     const updatedExpense = this.updatedItem();
     this.resetSavingForm();
     this.spinnerService.showSpinner();
-    this.expensesCrudService.updateExpense(updatedExpense).pipe(finalize(() => this.spinnerService.hideSpinner())).subscribe(() => {
-      this.loadExpensesForUserOnDate(this.selectedDay!.date);
-    });
+    this.expensesCrudService
+      .updateExpense(updatedExpense)
+      .pipe(finalize(() => this.spinnerService.hideSpinner()))
+      .subscribe(() => {
+        this.loadExpensesForUserOnDate(this.selectedDay!.date);
+      });
   }
 
   //DELETE
@@ -475,9 +555,12 @@ export class TrackerComponent implements OnInit {
 
   private delete(expense: Expense2) {
     if (expense.id) {
-      this.expensesCrudService.deleteExpense(expense.id).pipe(finalize(() => this.spinnerService.hideSpinner())).subscribe(() => {
-        this.loadExpensesForUserOnDate(this.selectedDay!.date);
-      });
+      this.expensesCrudService
+        .deleteExpense(expense.id)
+        .pipe(finalize(() => this.spinnerService.hideSpinner()))
+        .subscribe(() => {
+          this.loadExpensesForUserOnDate(this.selectedDay!.date);
+        });
     }
   }
 
@@ -485,7 +568,10 @@ export class TrackerComponent implements OnInit {
     this.verifyDeletion().subscribe(() => {
       this.spinnerService.showSpinner();
       this.delete(expense);
-      this.notificationService.showNotification('Expense deleted successfully!', 'success');
+      this.notificationService.showNotification(
+        'Expense deleted successfully!',
+        'success'
+      );
     });
   }
 
@@ -534,7 +620,10 @@ export class TrackerComponent implements OnInit {
     if (numValue <= 0) {
       // this.errorMessage = 'Amount must be greater than 0';
       this.isSaveDisabled = true;
-      this.notificationService.showNotification('Amount must be greater than 0', 'warning');
+      this.notificationService.showNotification(
+        'Amount must be greater than 0',
+        'warning'
+      );
       return;
     }
 
@@ -542,7 +631,10 @@ export class TrackerComponent implements OnInit {
       const parts = value.split('.');
       if (parts[1] && parts[1].length > 2) {
         input.value = numValue.toFixed(2);
-        this.notificationService.showNotification('Only two decimal places allowed.', 'warning');
+        this.notificationService.showNotification(
+          'Only two decimal places allowed.',
+          'warning'
+        );
       }
     }
     this.isSaveDisabled = false;
@@ -558,7 +650,10 @@ export class TrackerComponent implements OnInit {
     this.isSaveDisabled = !isValid;
 
     if (!isValid) {
-      this.notificationService.showNotification('Please fill out all fields correctly.', 'warning');
+      this.notificationService.showNotification(
+        'Please fill out all fields correctly.',
+        'warning'
+      );
     }
   }
 
@@ -603,17 +698,16 @@ export class TrackerComponent implements OnInit {
       return;
     }
 
-    this.categoryCrudService.getCategoriesForUser(userId)
-      .subscribe({
-        next: (categories) => {
-          this.categories = categories;
-          this.filteredCategories = categories;
-        },
-        error: (err) => {
-          console.error('Error loading categories:', err);
-        },
-        complete: () => {}
-      });
+    this.categoryCrudService.getCategoriesForUser(userId).subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.filteredCategories = categories;
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      },
+      complete: () => {},
+    });
   }
 
   toggleCategoryPopup() {
@@ -623,7 +717,9 @@ export class TrackerComponent implements OnInit {
   }
 
   addCategory() {
-    this.categoryCrudService.addCategory(this.newCategory, this.authService.getId()!).subscribe((response) => {});
+    this.categoryCrudService
+      .addCategory(this.newCategory, this.authService.getId()!)
+      .subscribe((response) => {});
     this.newCategory = '';
     this.loadCategories();
     // this.filterCategories();
@@ -632,10 +728,16 @@ export class TrackerComponent implements OnInit {
   deleteCategory(categoryId: string) {
     this.verifyDeletion().subscribe(() => {
       this.spinnerService.showSpinner();
-      this.categoryCrudService.deleteCategory(categoryId, this.authService.getId()!);
+      this.categoryCrudService.deleteCategory(
+        categoryId,
+        this.authService.getId()!
+      );
       this.loadCategories();
       this.spinnerService.hideSpinner();
-      this.notificationService.showNotification('Expense deleted successfully!', 'success');
+      this.notificationService.showNotification(
+        'Expense deleted successfully!',
+        'success'
+      );
     });
   }
 
@@ -645,7 +747,11 @@ export class TrackerComponent implements OnInit {
   }
 
   saveEditedCategory(categoryId: string) {
-    this.categoryCrudService.updateCategory(this.editedCategory, categoryId, this.authService.getId()!);
+    this.categoryCrudService.updateCategory(
+      this.editedCategory,
+      categoryId,
+      this.authService.getId()!
+    );
     this.editingCategory = undefined;
     this.loadCategories();
   }
@@ -654,7 +760,7 @@ export class TrackerComponent implements OnInit {
     if (!this.newCategory.trim()) {
       this.filteredCategories = [...this.categories];
     } else {
-      this.filteredCategories = this.categories.filter(category =>
+      this.filteredCategories = this.categories.filter((category) =>
         category.name.toLowerCase().includes(this.newCategory.toLowerCase())
       );
     }
@@ -780,13 +886,12 @@ export class TrackerComponent implements OnInit {
 
   displayedWeekStart: string = new Date().toISOString().split('T')[0]; // Track the start of the current displayed week
 
-
-  currentWeekStart: string = '';  // Start date of the current week
-  currentWeekEnd: string = '';    // End date of the current week
+  currentWeekStart: string = ''; // Start date of the current week
+  currentWeekEnd: string = ''; // End date of the current week
 
   goToPreviousWeek() {
     const firstDayOfWeek = new Date(this.displayedWeekStart);
-    firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7);  // Move back a week
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 7); // Move back a week
 
     this.displayedWeekStart = firstDayOfWeek.toISOString().split('T')[0];
 
@@ -796,10 +901,10 @@ export class TrackerComponent implements OnInit {
   }
 
   goToNextWeek() {
-    if (this.isCurrentWeek()) return;  // Prevent moving past the current week
+    if (this.isCurrentWeek()) return; // Prevent moving past the current week
 
     const firstDayOfWeek = new Date(this.displayedWeekStart);
-    firstDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);  // Move forward a week
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() + 7); // Move forward a week
 
     this.displayedWeekStart = firstDayOfWeek.toISOString().split('T')[0];
 
@@ -813,7 +918,9 @@ export class TrackerComponent implements OnInit {
   }
 
   getFormattedWeekRange(): string {
-    const { startDate, endDate } = this.getWeekInterval(this.displayedWeekStart);
+    const { startDate, endDate } = this.getWeekInterval(
+      this.displayedWeekStart
+    );
 
     const formatDate = (date: Date): string => {
       const day = date.getDate().toString().padStart(2, '0');
@@ -823,5 +930,4 @@ export class TrackerComponent implements OnInit {
 
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   }
-
 }
