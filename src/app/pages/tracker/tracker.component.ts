@@ -35,6 +35,7 @@ import { _Category, CategoryCrudService } from '../../services/category-crud.ser
 import { NotificationComponent } from "../../components/notification/notification.component";
 import { NotificationService } from '../../services/notification.service';
 
+
 interface DaySpending {
   date: string;
   dayName: string;
@@ -626,6 +627,7 @@ export class TrackerComponent implements OnInit {
     this.categoryCrudService.addCategory(this.newCategory, this.authService.getId()!).subscribe((response) => {});
     this.newCategory = '';
     this.loadCategories();
+    this.showCategoryPopup = false;
     // this.filterCategories();
   }
 
@@ -823,5 +825,26 @@ export class TrackerComponent implements OnInit {
 
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   }
+
+  isWeekVisible = false;
+  isexpenseVisible = false;
+  isUpdateVisible = false;
+
+  toggleWeekContent() {
+    this.isWeekVisible = !this.isWeekVisible;
+  }
+
+  toggleExpenseContent() {
+    this.isexpenseVisible = !this.isexpenseVisible;
+  }
+
+  toggleUploadContent() {
+    this.isUpdateVisible = !this.isUpdateVisible;
+  }
+
+  formatWeeklyAnalysis(): string {
+    return this.weeklyAnalysis.replace(/(\d+)\./g, '<br>$1.');
+  }
+  
 
 }
