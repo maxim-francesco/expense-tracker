@@ -1,3 +1,4 @@
+<app-popout></app-popout>
 <div class="background-container">
 
   <app-loading-spinner />
@@ -93,6 +94,12 @@
         <ng-container *ngIf="showWeeklyOverview">
           <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}$
           </h2>
+         
+          @if(urBudget != -1){
+            <h2>
+              UrBudget Remaining: {{ (urBudget - getWeeklyTotal()).toFixed(2) }}$
+            </h2>
+            }
           <button class="button"
                 (click)="toggleAnalysisOverview()">
           See analysis of your expenses
@@ -173,33 +180,38 @@
     <ng-container *ngIf="showWeeklyOverview">
     <div class="tracker-overlay">
       <div class="expenses-card">
-      <ul class="week-summary">
-        <li *ngFor="let day of weeklySpending"
-            (click)="toggleDayExpenses(day)"
-            class="clickable-day">
-          {{ day.dayName }}: {{ day.total }}€
+       
+          <ul class="week-summary">
+            <li
+              *ngFor="let day of weeklySpending"
+              (click)="toggleDayExpenses(day)"
+              class="clickable-day"
+            >
+              {{ day.dayName }}: {{ day.total }}€
 
-          <div *ngIf="day.isExpanded" class="expense-list">
-            <h4>Expenses for {{ day.dayName }}</h4>
-            <div *ngIf="day.expenses && day.expenses.length > 0">
-              <div class="expense-item" *ngFor="let _expense of day.expenses">
-                <div class="expense-info">
-                  <span class="expense-name">{{
-                    _expense.name }}</span>
-                  <span class="expense-category">{{
-                    _expense.category
-                    }}</span>
+              <div *ngIf="day.isExpanded" class="expense-list">
+                <h4>Expenses for {{ day.dayName }}</h4>
+                <div *ngIf="day.expenses && day.expenses.length > 0">
+                  <div
+                    class="expense-item"
+                    *ngFor="let _expense of day.expenses"
+                  >
+                    <div class="expense-info">
+                      <span class="expense-name">{{ _expense.name }}</span>
+                      <span class="expense-category">{{
+                        _expense.category
+                      }}</span>
+                    </div>
+                    <div class="expense-amount">{{ _expense.amount }} €</div>
+                  </div>
                 </div>
-                <div class="expense-amount">{{
-                  _expense.amount }} €</div>
+                <p *ngIf="day.expenses.length === 0">
+                  No expenses recorded for {{ day.dayName }}
+                </p>
               </div>
-            </div>
-            <p *ngIf="day.expenses.length === 0">
-              No expenses recorded for {{ day.dayName }}
-            </p>
-          </div>
-        </li>
-      </ul>
+            </li>
+          </ul>
+
     </div>
   </div>
     </ng-container>
