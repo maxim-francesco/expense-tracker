@@ -1,0 +1,14 @@
+<!-- Buton pentru a deschide pop-out-ul -->
+<button (click)="showPopup()">Deschide Pop-out</button>
+
+<!-- Pop-out -->
+<div class="popup-overlay" *ngIf="isVisible()">
+  <div class="popup-content">
+    <h2>Hei, ai uitat sa iti setezi un buget</h2>
+    <input type="text" [(ngModel)]="inputValue" placeholder="Scrie aici..." />
+    <div class="popup-actions">
+      <button (click)="hidePopup()">Anulează</button>
+      <button (click)="submitValue()">Confirmă</button>
+    </div>
+  </div>
+</div>
