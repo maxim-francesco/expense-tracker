@@ -1,326 +1,304 @@
-<app-popout></app-popout>
-
 <div class="background-container">
+
   <app-loading-spinner />
 
   <div class="overlay">
     <div class="card">
       <div class="head">
         {{
-          showWeeklyOverview
-            ? "Weekly Overview"
-            : showExpenseForm
-            ? "Add Expense"
-            : "Expense Tracker"
+        showWeeklyOverview
+        ? "Weekly Overview"
+        : showExpenseForm
+        ? "Add Expense"
+        : "Expense Tracker"
         }}
       </div>
 
       <div class="content">
-        <ng-container
-          *ngIf="
+        <ng-container *ngIf="
             !showWeeklyOverview &&
             !showAnalysisOverview &&
             !showAIExpertiseOverview
+
           "
         >
-          <!-- Week Navigation Container -->
-          <div class="week-navigation">
-            <!-- Previous Week Button -->
-            <button class="week-nav-button" (click)="goToPreviousWeek()">
-              ←
-            </button>
+        <button class="week-container" (click)="toggleWeekContent()">
 
-            <!-- Week Text -->
-            <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
-
-            <!-- Next Week Button -->
-            <button
-              class="week-nav-button"
-              (click)="goToNextWeek()"
-              [disabled]="isCurrentWeek()"
-            >
-              →
-            </button>
+          <h2 class="calendar-label" *ngIf="!isWeekVisible">Visualize weeks</h2>
+        
+          <!-- Week Navigation & Tabs (Hidden by Default) -->
+          <div *ngIf="isWeekVisible">
+            <div class="week-navigation">
+              <button class="week-nav-button" (click)="goToPreviousWeek(); $event.stopPropagation()">←</button>
+              <p class="week-label">Week: {{ getFormattedWeekRange() }}</p>
+              <button class="week-nav-button" (click)="goToNextWeek(); $event.stopPropagation()" [disabled]="isCurrentWeek()">→</button>
+            </div>
+        
+            <!-- Tabs for weekdays -->
+            <div class="tabs">
+              <button
+                *ngFor="let day of week"
+                class="tab-button"
+                [class.active]="selectedDay === day"
+                (click)="selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)"
+                [disabled]="isDateInFutureOrPast(day.date)">
+                {{ day.dayName }}
+              </button>
+            </div>
           </div>
-
-          <!-- Tabs for weekdays -->
-          <div class="tabs">
-            <button
-              *ngFor="let day of week"
-              class="tab-button"
-              [class.active]="selectedDay === day"
-              (click)="
-                selectedDay = day; loadExpensesForUserOnDate(selectedDay!.date)
-              "
-              [disabled]="isDateInFutureOrPast(day.date)"
-            >
-              {{ day.dayName }}
-            </button>
-          </div>
-
-          <div class="button-bar" *ngIf="!showAnalysisOverview">
-            <button class="button" (click)="toggleExpenseForm()">
+        </button>
+        
+        <button class="button-bar" *ngIf="!showExpenseForm" (click)="toggleExpenseContent()">
+          <h2 class="calendar-label" *ngIf="!isexpenseVisible">Perform operations</h2>
+          <div class="button-container" *ngIf="isexpenseVisible">
+            <button class="button"
+                    (click)="toggleExpenseForm()">
               {{ showExpenseForm ? "Back" : "Add Expense" }}
             </button>
-            <button class="button save-button" (click)="toggleWeeklyOverview()">
+            <button class="button save-button"
+                    (click)="toggleWeeklyOverview()">
               Weekly Overview
             </button>
           </div>
-
+        </button>
           <div class="notification-container">
             <app-notification></app-notification>
           </div>
 
-          <div class="upload-receipt">
-            <!-- Hidden File Input -->
+
+        <button class="receipt-container" (click)="toggleUploadContent()">
+          <h2 class="calendar-label" *ngIf="!isUpdateVisible">Extract expenses from receipt</h2>
+            
+          <div class="upload-receipt" *ngIf="isUpdateVisible">
+           <!-- Hidden File Input -->
             <input
-              #fileInput
-              (change)="onFileSelected($event)"
-              type="file"
-              accept="image/*"
-              style="display: none"
+            #fileInput
+            (change)="onFileSelected($event)"
+            type="file"
+            accept="image/*"
+            style="display: none"
             />
 
             <!-- Custom Button -->
-            <button class="upload-button" (click)="fileInput.click()">
-              Upload Receipt
-            </button>
+            <button class="upload-button" (click)="fileInput.click()">Upload Receipt</button>
 
             <button class="extract-button" (click)="processImage()">
               Extract
             </button>
           </div>
-
-          <!-- Expense Form -->
-          <ng-container *ngIf="showExpenseForm">
-            <div class="expense-form">
-              <h3>Expenses for {{ selectedDay!.dayName }}</h3>
-
-              <label>Expense Name:</label>
-              <input
-                #expName
-                [(ngModel)]="expenseName"
-                (change)="
-                  isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                "
-                type="text"
-                placeholder="Enter expense name"
-              />
-
-              <label
-                >Add or select category
-                <button
-                  class="add-category-button"
-                  (click)="toggleCategoryPopup()"
-                >
-                  +
-                </button>
-              </label>
-              <div class="category-container">
-                <select
-                  #expCategory
-                  [(ngModel)]="selectedCategory"
-                  (change)="
-                    isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                  "
-                  required
-                >
-                  <option value="" disabled selected>Select Category</option>
-                  <option
-                    *ngFor="let category of categories"
-                    [value]="category"
-                  >
-                    {{ category.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div *ngIf="showCategoryPopup" class="category-popup-overlay">
-                <div class="category-popup">
-                  <h3>Manage Categories</h3>
-                  <input
-                    type="text"
-                    [(ngModel)]="newCategory"
-                    placeholder="Enter new category"
-                    (input)="filterCategories()"
-                  />
-                  <button class="button" (click)="addCategory()">Add</button>
-
-                  <ul class="category-list">
-                    <li *ngFor="let category of filteredCategories">
-                      <span>{{ category.name }}</span>
-
-                      <input
-                        *ngIf="editingCategory === category.id"
-                        type="text"
-                        [(ngModel)]="editedCategory"
-                      />
-
-                      <div class="category-buttons">
-                        <button
-                          class="edit-btn"
-                          *ngIf="editingCategory !== category.id"
-                          (click)="editCategory(category)"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          class="save-btn"
-                          *ngIf="editingCategory === category.id"
-                          (click)="saveEditedCategory(category.id!)"
-                        >
-                          Save
-                        </button>
-                        <button
-                          class="delete-btn"
-                          (click)="deleteCategory(category.id!)"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </li>
-                  </ul>
-
-                  <button
-                    class="button cancel-button"
-                    (click)="toggleCategoryPopup()"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-
-              <label>Amount:</label>
-              <input
-                #expAmount
-                [(ngModel)]="expenseAmount"
-                type="number"
-                (change)="
-                  isEditing ? validateFormAtUpdate() : validateFormAtSave()
-                "
-                placeholder="Enter an amount"
-                (input)="validateAmount($event)"
-                (keypress)="onKeyPress($event)"
-                step="0.01"
-                min="0.01"
-              />
-            </div>
-          </ng-container>
-
-          <!-- Expense List -->
-          <ng-container
-            *ngIf="
-              !showExpenseForm &&
-              !showAnalysisOverview &&
-              !showAIExpertiseOverview
-            "
-          >
-            <div class="expense-list">
-              <h4>Existing Expenses</h4>
-              <div class="expense-item" *ngFor="let _expense of expenses2">
-                <div class="expense-info">
-                  <span class="expense-name">{{ _expense.name }}</span>
-                  <span class="expense-category">{{ _expense.category }}</span>
-                </div>
-                <div class="expense-amount">
-                  {{ _expense.amount }} €
-                  <button class="edit-btn" (click)="turnOnUpdateMode(_expense)">
-                    Edit
-                  </button>
-                  <button class="delete-btn" (click)="deleteExpense2(_expense)">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-
-          <button
-            [disabled]="isSaveDisabled"
-            class="weekly-overview-button"
-            *ngIf="showExpenseForm"
-            (click)="isEditing ? updateExpense2() : addExpenseFromForm()"
-          >
-            {{ isEditing ? "Update" : "Save" }}
-          </button>
+        </button>
+       
+          
         </ng-container>
-
         <ng-container *ngIf="showWeeklyOverview">
-          <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}$</h2>
-          @if(urBudget != -1){
-          <h2>
-            UrBudget Remaining: {{ (urBudget - getWeeklyTotal()).toFixed(2) }}
+          <h2>Total Weekly Expenses: {{ getWeeklyTotal() }}$
           </h2>
-          }
-          <ul class="week-summary">
-            <li
-              *ngFor="let day of weeklySpending"
-              (click)="toggleDayExpenses(day)"
-              class="clickable-day"
-            >
-              {{ day.dayName }}: {{ day.total }}€
-
-              <div *ngIf="day.isExpanded" class="expense-list">
-                <h4>Expenses for {{ day.dayName }}</h4>
-                <div *ngIf="day.expenses && day.expenses.length > 0">
-                  <div
-                    class="expense-item"
-                    *ngFor="let _expense of day.expenses"
-                  >
-                    <div class="expense-info">
-                      <span class="expense-name">{{ _expense.name }}</span>
-                      <span class="expense-category">{{
-                        _expense.category
-                      }}</span>
-                    </div>
-                    <div class="expense-amount">{{ _expense.amount }} €</div>
-                  </div>
-                </div>
-                <p *ngIf="day.expenses.length === 0">
-                  No expenses recorded for {{ day.dayName }}
-                </p>
-              </div>
-            </li>
-          </ul>
-          <button class="button" (click)="toggleAnalysisOverview()">
-            See analysis of your expenses
-          </button>
-          <button class="button" (click)="toggleWeeklyOverview()">
-            Back to Tracker
-          </button>
-        </ng-container>
-
-        <!-- here goes analysis -->
+          <button class="button"
+                (click)="toggleAnalysisOverview()">
+          See analysis of your expenses
+        </button>
+        <button class="button"
+                (click)="toggleWeeklyOverview()">
+          Back to Tracker
+        </button>
+      </ng-container>
         <ng-container *ngIf="showAnalysisOverview">
           <h2>Analysis of your expenses</h2>
-          <app-pie
-            [categoryTotals]="getWeeklyCategoryTotals()"
-            [weeklyTotal]="getWeeklyTotal()"
-          ></app-pie>
-          <button class="button" (click)="toggleAIExpertiseOverview()">
+          <app-pie [categoryTotals]="getWeeklyCategoryTotals()"
+                   [weeklyTotal]="getWeeklyTotal()"></app-pie>
+          <button class="button"
+                  (click)="toggleAIExpertiseOverview()">
             AI advices based on your expenses
           </button>
           <button class="button" (click)="exportToExcel()">
             Export your expeses to excel
           </button>
-          <button class="button" (click)="toggleWeeklyOverview()">
+          <button class="button"
+                  (click)="toggleWeeklyOverview()">
             Back to Weekly Overview
           </button>
         </ng-container>
 
         <ng-container *ngIf="showAIExpertiseOverview">
           <h2>AI Expertise</h2>
-          <p>
-            {{ weeklyAnalysis }}
-          </p>
-          <button class="button" (click)="toggleAIExpertiseOverview()">
+          <p [innerHTML]="formatWeeklyAnalysis()" style="text-align: left;"></p>
+          <button class="button"
+                  (click)="toggleAIExpertiseOverview()">
             Back to Analysis
           </button>
         </ng-container>
       </div>
     </div>
+    
   </div>
-  <div class="tracker-photo"></div>
+  <div *ngIf="showCategoryPopup"
+                   class="category-popup-overlay">
+                <div class="category-popup">
+                  <h3>Manage Categories</h3>
+                  <div class="category-line">
+                  <input type="text"
+                         [(ngModel)]="newCategory"
+                         placeholder="Enter new category"
+                         (input)="filterCategories()" />
+                  <button class="add-new-category-button"
+                          (click)="addCategory()">Add</button>
+                        </div>
+                  <ul class="category-list">
+                    <li *ngFor="let category of filteredCategories">
+                      <span>{{ category.name }}</span>
+
+                      <input *ngIf="editingCategory === category.id" type="text" [(ngModel)]="editedCategory" />
+
+                      <div class="category-buttons">
+                        <button class="edit-btn"
+                                *ngIf="editingCategory !== category.id"
+                                (click)="editCategory(category)">Edit</button>
+                        <button class="save-btn"
+                                *ngIf="editingCategory === category.id"
+                                (click)="saveEditedCategory(category.id!)">Save</button>
+                        <button class="delete-btn"
+                                (click)="deleteCategory(category.id!)">Delete</button>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <button class="button cancel-button"
+                          (click)="toggleCategoryPopup()">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+  <div class="tracker-photo">
+   
+    <ng-container *ngIf="showWeeklyOverview">
+    <div class="tracker-overlay">
+      <div class="expenses-card">
+      <ul class="week-summary">
+        <li *ngFor="let day of weeklySpending"
+            (click)="toggleDayExpenses(day)"
+            class="clickable-day">
+          {{ day.dayName }}: {{ day.total }}€
+
+          <div *ngIf="day.isExpanded" class="expense-list">
+            <h4>Expenses for {{ day.dayName }}</h4>
+            <div *ngIf="day.expenses && day.expenses.length > 0">
+              <div class="expense-item" *ngFor="let _expense of day.expenses">
+                <div class="expense-info">
+                  <span class="expense-name">{{
+                    _expense.name }}</span>
+                  <span class="expense-category">{{
+                    _expense.category
+                    }}</span>
+                </div>
+                <div class="expense-amount">{{
+                  _expense.amount }} €</div>
+              </div>
+            </div>
+            <p *ngIf="day.expenses.length === 0">
+              No expenses recorded for {{ day.dayName }}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+    </ng-container>
+    <ng-container *ngIf="showExpenseForm">
+      <div class="tracker-overlay">
+      <div class="add-expenses-form">
+      <div class="expense-form">
+        <h3>Expenses for {{ selectedDay!.dayName }}
+        </h3>
+
+        <label>Expense Name:</label>
+        <input #expName [(ngModel)]="expenseName"
+               (change)="
+            isEditing ? validateFormAtUpdate() : validateFormAtSave()
+          " type="text"
+               placeholder="Enter expense name" />
+
+        <label>Add or select category
+          <button class="add-category-button"
+                  (click)="toggleCategoryPopup()">+</button>
+        </label>
+        <div class="category-container">
+          <select #expCategory
+                  [(ngModel)]="selectedCategory"
+                  (change)="
+              isEditing ? validateFormAtUpdate() : validateFormAtSave()
+            " required>
+            <option value="" disabled selected>Select
+              Category</option>
+            <option *ngFor="let category of categories"
+                    [value]="category">
+              {{ category.name }}
+            </option>
+          </select>
+          
+        </div>
+
+        
+
+        <label>Amount:</label>
+        <input #expAmount [(ngModel)]="expenseAmount"
+               type="number" (change)="
+            isEditing ? validateFormAtUpdate() : validateFormAtSave()
+          " placeholder="Enter an amount"
+               (input)="validateAmount($event)"
+               (keypress)="onKeyPress($event)"
+               step="0.01" min="0.01" />
+      </div>
+
+      <button [disabled]="isSaveDisabled"
+                  class="weekly-overview-button"
+                  *ngIf="showExpenseForm"
+                  (click)="isEditing ? updateExpense2() : addExpenseFromForm()">
+            {{ isEditing ? "Update" : "Save" }}
+          </button>
+          <button class="weekly-overview-button"
+                    (click)="toggleExpenseForm()">
+              {{ showExpenseForm ? "Back" : "Add Expense" }}
+          </button>
+        </div>
+        
+      </div>
+    </ng-container>
+    <ng-container *ngIf="
+    !showExpenseForm &&
+    !showAnalysisOverview &&
+    !showAIExpertiseOverview &&
+    !showWeeklyOverview &&
+    expenses2.length > 0
+  ">
+  <div class="tracker-overlay">
+    <div class="expenses-for-the-day">
+      <h4 *ngIf="expenses2.length > 0">Existing Expenses</h4>
+      <div class="expense-item" *ngFor="let _expense of expenses2">
+        <div class="expense-info">
+          <span class="expense-name">{{ _expense.name }}</span>
+          <span class="expense-category">{{ _expense.category }}</span>
+        </div>
+        <div class="expense-amount">
+          {{ _expense.amount }} €
+          <button class="edit-btn" (click)="turnOnUpdateMode(_expense)">
+            Edit
+          </button>
+          <button class="delete-btn" (click)="deleteExpense2(_expense)">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+  </div>
 </div>
+
+
+
+
+
+
 
 <app-chatbot></app-chatbot>
