@@ -44,7 +44,6 @@ import {
   WeeklyBudgetService,
 } from '../../services/weekly-budget.service';
 
-
 interface DaySpending {
   date: string;
   dayName: string;
@@ -723,7 +722,6 @@ export class TrackerComponent implements OnInit {
       .subscribe((response) => {});
     this.newCategory = '';
     this.loadCategories();
-    this.showCategoryPopup = false;
     // this.filterCategories();
   }
 
@@ -932,8 +930,7 @@ export class TrackerComponent implements OnInit {
 
     return `${formatDate(startDate)} - ${formatDate(endDate)}`;
   }
-
-
+  
   isWeekVisible = false;
   isexpenseVisible = false;
   isUpdateVisible = false;
@@ -954,4 +951,5 @@ export class TrackerComponent implements OnInit {
     return this.weeklyAnalysis.replace(/(\d+)\./g, '<br>$1.');
   }
   
+
 }
