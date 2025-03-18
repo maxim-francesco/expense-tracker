@@ -3,9 +3,6 @@
 [![Deployment Status](https://img.shields.io/badge/deployment-active-brightgreen)](https://expense-tracker-ntt.vercel.app)
 [![Angular](https://img.shields.io/badge/Angular-19-DD0031)](https://angular.io/)
 [![Firebase](https://img.shields.io/badge/Firebase-Integrated-FFA000)](https://firebase.google.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.9-3178C6)](https://www.typescriptlang.org/)
-
-Deployed at: [Vercel App](https://expense-tracker-ntt.vercel.app)
 
 ## 🔍 Overview
 
