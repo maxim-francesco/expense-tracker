@@ -1,4 +1,4 @@
-# ExpenseTracker 📊(IN WORKING)
+# ExpenseTracker 📊 (IN WORKING)
 
 [![Deployment Status](https://img.shields.io/badge/deployment-active-brightgreen)](https://expense-tracker-ntt.vercel.app)
 [![Angular](https://img.shields.io/badge/Angular-19-DD0031)](https://angular.io/)
@@ -12,6 +12,8 @@ The Expense Tracker is an internal Angular application developed as part of the 
 
 * **Quick Expense Entry**: Submit expenses on-the-go with an intuitive interface
 * **Receipt Management**: Upload, store, and organize digital receipts *(coming in V3)*
+* **OCR-Based Receipts**: Automatically extract expense data from uploaded receipts using Google Vision API
+* **Smart Insights & Budgeting**: Gemini AI helps users analyze spending patterns and provides smart budgeting suggestions
 * **Expense Categories**: Categorize expenses for better financial visibility
 * **Approval Workflow**: Streamlined approval process with notifications *(coming in V3)*
 * **Reporting**: Generate detailed expense reports across various time periods *(coming in V2)*
@@ -41,9 +43,6 @@ This project uses Firebase services and requires proper configuration via enviro
    * Firebase Storage
    * Google Analytics (optional, but required for the measurement ID)
 
-> [!NOTE]
-> All these services must be properly configured before the application can function correctly.
-
 ### 🔑 Getting your Firebase Configuration Keys:
 
 1. Go to the [Firebase Console](https://console.firebase.google.com/)
@@ -60,9 +59,6 @@ This project uses Firebase services and requires proper configuration via enviro
 3. **Realtime Database**: Create a database and configure security rules
 4. **Firebase Storage**: Set up storage and configure security rules
 
-> [!TIP]
-> Consider using Firebase's development and production environments to separate your testing from live data.
-
 ## 💻 Installation
 
 ### Clone the repository:
@@ -75,16 +71,16 @@ git clone https://github.com/andricolae/expense-tracker.git
 cd expense-tracker
 ```
 
-### Install dependencies
+### Install dependencies:
 ```bash
-Install dependencies:
+npm install
 ```
 
 ### Set up environment variables
 
-Create a .env file in the root directory of the project with the following structure:
+Create a `.env` file in the root directory of the project with the following structure:
 
-```javascript
+```env
 API_KEY="your-firebase-api-key"
 AUTH_DOM="your-firebase-auth-domain"
 PROJ_ID="your-firebase-project-id"
@@ -97,69 +93,37 @@ GMNI="your-gemini-api-key"
 DB_URL="your-firebase-database-url"
 ```
 
-Replace the placeholder values with your project credentials. You can find these values in your Firebase/Google Vision/Google Gemini project settings.
-
-The "start" option in package.json will generate the environment variable script based on your .env file
-
 ```json
 "start": "node -r dotenv/config mynode.js && ng serve",
 ```
 
-> [!CAUTION]
-> Never commit your .env or environment.ts file to version control. These files contain sensitive API keys and credentials that should remain private.
-
-### Start the development server
-
-```bash
-ng serve
-```
-
-> [!NOTE]
-> Open your browser and navigate to http://localhost:4200
-
 ## 🏗️ Architecture
 
-##### The application follows a modular architecture with:
+- Core modules for authentication, data services, and HTTP interceptors
+- Feature modules for expenses, reports, approvals, and user settings
+- Shared modules for common components and directives
+- State management using NgRx for predictable data flow
 
-* Core modules for authentication, data services, and HTTP interceptors
-* Feature modules for expenses, reports, approvals, and user settings
-* Shared modules for common components and directives
-* State management using NgRx for predictable data flow
+### Tech Stack
 
-#### Tech Stack
-
-Frontend: Angular 19
-Authentication: Firebase Auth
-CI/CD: Github and Vercel
+- Frontend: Angular 19
+- Backend: Firebase
+- OCR: Google Vision API
+- AI Insights: Gemini AI
+- CI/CD: GitHub and Vercel
 
 ## 👥 Team
-
-The Expense Tracker was developed by the following Tech Trek Angular team at NTT DATA 
 
 | Name | Role |
 | --- | --- |
 | Anna Marita Thuri | Visual Experience Architect |
 | Antonia Gabriela Albu | Visual Experience Architect |
-| Francesco Maxim | Receipt Whisperer |
+| Francesco Maxim | Receipt Whisperer – OCR & AI Integration |
 | Robert Gengiu | Access Maestro |
 | Tudor Ovidiu Atodiresei | Authentication Guardian |
 | Andrei Nicolae Calutiu | Expense Engineer |
 
-### 🤝 Contributing
-
-As this is an internal Tech Trek project, contributions are welcome from all NTT DATA employees. 
-
-Please follow these steps:
-1. Check the issue tracker for open tasks
-2. Request to be assigned to an issue
-3. Create a feature branch from develop
-4. Submit a merge request with your changes
-5. Ensure CI/CD pipeline passes
-6. Request a code review from the team
-
-> [!IMPORTANT]
-> Always create a new branch from develop for your features, not from main.
-
 ## 📝 License
-This project is proprietary and confidential. The code and its assets are the exclusive property of NTT DATA. Unauthorized use, reproduction, or distribution is prohibited.
+
+This project is proprietary and confidential. The code and its assets are the exclusive property of NTT DATA. Unauthorized use, reproduction, or distribution is prohibited.  
 © 2025 NTT DATA | All Rights Reserved
